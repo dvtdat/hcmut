@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cstring>
 
+/* Implement void process(const char *str, char *outstr) function which eliminates redundant space characters 
+so that there are no consecutive space characters and there is no space character at the beginning/end of string.*/
+
 void process(char str[], char outstr[]) {
     int n = 0;
     bool flag = false;

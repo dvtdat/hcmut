@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstring>
 
+/*Implement void process(const char *str, char *outstr) function which reverses the string.*/
+
 void process(char str[], char outstr[])
 {
     for (int i = 0; i < strlen(str); ++i)
