@@ -26,6 +26,6 @@ int main()
 {
     string s = "Sai Gon";
     string s1 = "Sai Gon";
-    string s2 = "fdaasfafs";
+    string s2 = " h";
     replaceString(s, s1, s2);
 }
