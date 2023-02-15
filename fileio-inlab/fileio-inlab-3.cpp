@@ -3,27 +3,32 @@
 
 using namespace std;
 
+float a[1000][1000];
+
 void process(string fileName)   
 {
     ifstream ip; ip.open(fileName);
 
-    int n, m;
-    ip >> n >> m;
 
-    double mxOverall = -1000.001;
-
+    int n, m; ip >> n >> m;
     for (int i = 0; i < n; ++i)
     {
-        double mx = -1000.001;
+        for (int j = 0; j < m; ++j) ip >> a[i][j];
+    }
 
+    float mx, mxOverall = -10000000000;
+    for (int i = 0; i < n; ++i)
+    {
+        mx = -10000000000;
         for (int j = 0; j < m; ++j)
         {
-            double v; ip >> v;
-            mx = max(v, mx);
+            mx = max(mx, a[i][j]);
+            mxOverall = max(mxOverall, a[i][j]);
         }
+
         cout << mx << ' ';
-        mxOverall = max(mx, mxOverall);
     }
+
     cout << mxOverall;
 }
 
