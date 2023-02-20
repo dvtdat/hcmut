@@ -61,8 +61,11 @@ struct Knights
     int healthPoint, level, remedy, maidenKiss, phoenixDown;
     int rescue = 0;
 
-    int prevHealthPoint = 0, prevLevel = 1;
+    int prevLevel = 1;
     bool isArthur = false, isLancelot = false;
+    bool continueable = true;
+    
+    bool meetAclepius = false, meetMerlin = false;
 
     void init(string s)
     {
@@ -243,6 +246,15 @@ struct Events
             knight.check();
         }
 
+        void pickUpItem(Knights &knight, int type)
+        {
+            if (type == 15) knight.remedy = min(maxRemedy, knight.remedy + 1);
+            if (type == 16) knight.maidenKiss = min(maxMaidenKiss, knight.maidenKiss + 1);
+            if (type == 17) knight.phoenixDown = min(maxPhoenixDown, knight.phoenixDown + 1);
+
+            knight.check();
+        }
+
         void pickUpMushMario(Knights &knight)
         {
             int addedHP = prefixOdd[((knight.level + knight.phoenixDown) % 5 + 1) * 3] % 100;
@@ -258,41 +270,83 @@ struct Events
         }
 
         void pickUpMushGhost(Knights &knight)
-        {
+        {   
+            ifstream fileIn;
+            fileIn.open(loot.lootFile[0]);
 
+    
+            fileIn.close();
+        }
+
+        void meetAsclepius(Knights &knight)
+        {   
+            ifstream fileIn;
+            fileIn.open(loot.lootFile[1]);
+
+            knight.meetAclepius = true;
+
+            int rows, columns; fileIn >> rows >> columns;
+
+            for (int i = 0; i <= rows; ++i)
+            {
+                string s; getline(fileIn, s);
+                cout << s << '\n';
+                stringstream ss(s);
+                int inp;
+                for (int j = 0; j < min(3, columns); ++j)
+                {
+                    ss >> inp;
+                    pickUpItem(knight, inp);
+                }
+            }
+
+            fileIn.close();
+        }
+
+        void meetMerlin(Knights &knight)
+        {   
+            ifstream fileIn;
+            fileIn.open(loot.lootFile[2]);
+
+            knight.meetMerlin = true;
+            
+            fileIn.close();
         }
 
         void meetBowser(Knights &knight)
         {
-
-        }
-
-        void meetMerlin(Knights &knight)
-        {
-
-        }
-
-
-        void pickUpItem(Knights &knight, int type)
-        {
-            if (type == 15) knight.remedy = min(maxRemedy, knight.remedy + 1);
-            if (type == 16) knight.maidenKiss = min(maxMaidenKiss, knight.maidenKiss + 1);
-            if (type == 17) knight.phoenixDown = min(maxPhoenixDown, knight.phoenixDown + 1);
-
-            knight.check();
+            if (knight.isArthur || (knight.isLancelot && knight.level >= 8) || (knight.level == 10))
+            {
+                knight.level = 10; return;
+            }
+            knight.rescue = 0;
+            knight.continueable = 0;
         }
 
     } eventList;
 
     void lookUp(Knights &knight, int index)
     {
-        if (arr[index] == 0) eventList.princessRescued(knight);
-        if (1 <= arr[index] && arr[index] <= 5) eventList.meetMonster(knight, arr[index], index);
-        if (arr[index] == 6) eventList.meetShaman(knight, index);
-        if (arr[index] == 7) eventList.meetSirenVajsh(knight, index);
-        if (15 <= arr[index] && arr[index] <= 17) eventList.pickUpItem(knight, arr[index]);
-        if (arr[index] == 11) eventList.pickUpMushMario(knight);
-        if (arr[index] == 12) eventList.pickUpMushFibo(knight);
+        if (arr[index] == 0) 
+            eventList.princessRescued(knight);
+        if (1 <= arr[index] && arr[index] <= 5) 
+            eventList.meetMonster(knight, arr[index], index);
+        if (arr[index] == 6) 
+            eventList.meetShaman(knight, index);
+        if (arr[index] == 7) 
+            eventList.meetSirenVajsh(knight, index);
+        if (15 <= arr[index] && arr[index] <= 17) 
+            eventList.pickUpItem(knight, arr[index]);
+        if (arr[index] == 11) 
+            eventList.pickUpMushMario(knight);
+        if (arr[index] == 12) 
+            eventList.pickUpMushFibo(knight);
+        if (arr[index] == 18 && !knight.meetMerlin) 
+            eventList.meetMerlin(knight);
+        if (arr[index] == 19 && !knight.meetAclepius) 
+            eventList.meetAsclepius(knight);
+        if (arr[index] == 99) 
+            eventList.meetBowser(knight);
     }
 
 
@@ -311,6 +365,8 @@ void dataInput(string file_input, Knights &knight, Events &events)
     knight.init(firstInpStr);
     events.init(secondInpStr);
     loot.init(thirdInpStr);
+
+    fileIn.close();
 }
 
 void adventureToKoopa(string file_input, int &healthPoint, int &level, int &remedy, int &maidenKiss, int &phoenixDown, int &rescue) 
@@ -319,12 +375,12 @@ void adventureToKoopa(string file_input, int &healthPoint, int &level, int &reme
     dataInput(file_input, knight, events);
 
     int i = 0;
-    while (i <= events.num && knight.rescue == 0 && knight.healthPoint >= 0)
+    while (i <= events.num && knight.rescue == 0 && knight.healthPoint >= 0 && knight.continueable)
     {
         knight.display();
         events.lookUp(knight, ++i);
     }
-    if (i == events.num && knight.healthPoint >= 0) knight.rescue = 1;
+    if (i == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
 
     knight.display();
 }
