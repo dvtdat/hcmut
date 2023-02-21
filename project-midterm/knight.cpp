@@ -27,6 +27,16 @@ void lowercase(string &s)
     }
 }
 
+string intToString(int num)
+{
+    string s = "";
+    while (num != 0)
+    {
+        s = (char)((num % 10) + '0') + s; num /= 10;
+    }
+    return s;
+}
+
 void initialSetUp()
 {
     for (int i = 0; i <= 1100; ++i) isPrime[i] = true, isFibo[i] = false;
@@ -191,6 +201,80 @@ struct Events
 
     struct List
     {
+        struct MushGhost
+        {
+            int arr[200];
+            int n; 
+
+            void init(string file_mush_ghost)
+            {
+                ifstream fileIn;
+                fileIn.open(file_mush_ghost);
+
+                fileIn >> n;
+
+                string s; getline(fileIn, s); getline(fileIn, s);
+                stringstream ss(s);
+
+                int i = 0;
+                string a[1000];
+                while (ss.good())
+                {
+                    string tmp;
+                    getline(ss, tmp, ',');
+                    a[i++] = tmp;
+                }
+
+                for (int i = 0; i < n; ++i)
+                {
+                    int tmp;
+                    stringstream(a[i]) >> arr[i];
+                }
+
+                fileIn.close();
+            }
+
+            void mushTypeOne(int &minIndex, int &maxIndex)
+            {
+                int mn = inf, mx = -inf;
+                for (int i = 0; i < n; ++i)
+                {
+                    if (arr[i] <= mn)
+                    {
+                        mn = arr[i]; minIndex = i;
+                    }
+
+                    if (arr[i] >= mx)
+                    {
+                        mx = arr[i]; maxIndex = i;
+                    }
+                }
+            }
+
+            void mushTypeTwo(int &mtMax, int &mtIndex)
+            {
+                mtMax = -2, mtIndex = -3;
+
+                int x = 0, y = n - 1;
+                while (arr[x] < arr[x + 1]) x++;
+                while (arr[y - 1] > arr[y]) y--;
+
+                if (x != y) return;
+                mtMax = arr[x]; mtIndex = x;
+            }
+                    
+            void mushTypeThree(int &minIndex, int &maxIndex)
+            {
+
+            }
+
+            void mushTypeFour(int &minIndex, int &maxIndex)
+            {
+
+            }
+
+        } mushGhost;
+
         void princessRescued(Knights &knight)
         {
             knight.rescue = 1;
@@ -264,18 +348,28 @@ struct Events
         void pickUpMushFibo(Knights &knight)
         {
             if (knight.healthPoint == 1) return;
-            int i = knight.healthPoint;
+            int i = knight.healthPoint - 1;
             while (!isFibo[i]) i--;
             knight.healthPoint = i;
         }
 
-        void pickUpMushGhost(Knights &knight)
+        void pickUpMushGhost(Knights &knight, string s)
         {   
-            ifstream fileIn;
-            fileIn.open(loot.lootFile[0]);
+            int order[2000], n = 0;
+            for (int i = 2; i < s.length(); ++i) order[n++] = s[i] - '0';
 
-    
-            fileIn.close();
+            mushGhost.init(loot.lootFile[0]);
+
+            int x, y;
+            for (int i = 0; i < n; ++i)
+            {
+                if (order[i] == 1) mushGhost.mushTypeOne(x, y);
+                if (order[i] == 2) mushGhost.mushTypeTwo(x, y);
+                if (order[i] == 3) mushGhost.mushTypeThree(x, y);
+                if (order[i] == 4) mushGhost.mushTypeFour(x, y);
+
+                knight.healthPoint = knight.healthPoint - (x + y);
+            }
         }
 
         void meetAsclepius(Knights &knight)
@@ -290,7 +384,6 @@ struct Events
             for (int i = 0; i <= rows; ++i)
             {
                 string s; getline(fileIn, s);
-                cout << s << '\n';
                 stringstream ss(s);
                 int inp;
                 for (int j = 0; j < min(3, columns); ++j)
@@ -327,6 +420,8 @@ struct Events
 
     void lookUp(Knights &knight, int index)
     {
+        string sTmp = intToString(arr[index]);
+
         if (arr[index] == 0) 
             eventList.princessRescued(knight);
         if (1 <= arr[index] && arr[index] <= 5) 
@@ -341,6 +436,8 @@ struct Events
             eventList.pickUpMushMario(knight);
         if (arr[index] == 12) 
             eventList.pickUpMushFibo(knight);
+        if (sTmp[0] == '1' && sTmp[1] == '3')
+            eventList.pickUpMushGhost(knight, sTmp);
         if (arr[index] == 18 && !knight.meetMerlin) 
             eventList.meetMerlin(knight);
         if (arr[index] == 19 && !knight.meetAclepius) 
