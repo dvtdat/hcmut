@@ -69,7 +69,7 @@ void initialSetUp()
 struct Knights
 {
     int healthPoint, level, remedy, maidenKiss, phoenixDown;
-    int rescue = 0;
+    int rescue = -1;
 
     int prevLevel = 1;
     bool isArthur = false, isLancelot = false;
@@ -203,7 +203,7 @@ struct Events
     {
         struct MushGhost
         {
-            int arr[200];
+            int arr[200], transArr[200];
             int n; 
 
             void init(string file_mush_ghost)
@@ -234,6 +234,16 @@ struct Events
                 fileIn.close();
             }
 
+            void transform()
+            {
+                for (int i = 0; i < n; ++i) transArr[i] = arr[i];
+                for (int i = 0; i < n; ++i)
+                {
+                    if (arr[i] < 0) transArr[i] = -transArr[i];
+                    transArr[i] = (17 * transArr[i] + 9) % 257;
+                }
+            }
+
             void mushTypeOne(int &minIndex, int &maxIndex)
             {
                 int mn = inf, mx = -inf;
@@ -259,50 +269,38 @@ struct Events
                 while (arr[x] < arr[x + 1]) x++;
                 while (arr[y - 1] > arr[y]) y--;
 
-                if (x != y) return;
+                if (x != y) return; 
                 mtMax = arr[x]; mtIndex = x;
             }
                     
             void mushTypeThree(int &minIndex, int &maxIndex)
             {
-                for (int i = 0; i < n; ++i)
-                {
-                    if (arr[i] < 0) arr[i] = -arr[i];
-                    arr[i] = (17 * arr[i] + 9) % 257;
-                }
-
                 int mn = inf, mx = -inf;
                 for (int i = 0; i < n; ++i)
                 {
-                    if (arr[i] < mn)
+                    if (transArr[i] < mn)
                     {
-                        mn = arr[i]; minIndex = i;
+                        mn = transArr[i]; minIndex = i;
                     }
 
-                    if (arr[i] > mx)
+                    if (transArr[i] > mx)
                     {
-                        mx = arr[i]; maxIndex = i;
+                        mx = transArr[i]; maxIndex = i;
                     }
                 }
             }
 
             void mushTypeFour(int &mtMax, int &mtIndex)
             {
-                for (int i = 0; i < n; ++i)
-                {
-                    if (arr[i] < 0) arr[i] = -arr[i];
-                    arr[i] = (17 * arr[i] + 9) % 257;
-                }
-
                 int mx = -inf, mxIndex = -1, sMx = -inf, sMxIndex = -1;
                 for (int i = 0; i < n; ++i)
                 {
-                    if (mx < arr[i])
+                    if (mx < transArr[i])
                     {
                         sMx = mx;
                         sMxIndex = mxIndex;
 
-                        mx = arr[i];
+                        mx = transArr[i];
                         mxIndex = i;
                     }
                 }
@@ -320,7 +318,7 @@ struct Events
 
         void meetMonster(Knights &knight, int type, int index)
         {
-            int damage[6] = {0, 10, 15, 45, 75, 85};
+            int damage[6] = {0, 10, 15, 45, 75, 95};
             int levelO = index > 6 ? (index % 10 > 5 ? index % 10 : 5) : index % 10;
 
             if (knight.level > levelO || knight.isArthur || knight.isLancelot)
@@ -381,6 +379,8 @@ struct Events
         {
             int addedHP = prefixOdd[((knight.level + knight.phoenixDown) % 5 + 1) * 3] % 100;
             knight.healthPoint = min(maxHP, knight.healthPoint + addedHP);
+            knight.healthPoint++;
+            while(!isPrime[knight.healthPoint]) knight.healthPoint++;
         }
 
         void pickUpMushFibo(Knights &knight)
@@ -391,12 +391,13 @@ struct Events
             knight.healthPoint = i;
         }
 
-        void pickUpMushGhost(Knights &knight, string s)
+        void pickUpMushGhost(Knights &knight, string s) // FOR SOME REASON THIS IS STILL WRONG??
         {   
             int order[2000], n = 0;
             for (int i = 2; i < s.length(); ++i) order[n++] = s[i] - '0';
 
             mushGhost.init(loot.lootFile[0]);
+            mushGhost.transform();
 
             int x, y;
             for (int i = 0; i < n; ++i)
@@ -405,8 +406,9 @@ struct Events
                 if (order[i] == 2) mushGhost.mushTypeTwo(x, y);
                 if (order[i] == 3) mushGhost.mushTypeThree(x, y);
                 if (order[i] == 4) mushGhost.mushTypeFour(x, y);
-                cout << x << ' ' << y << '\n';
+                
                 knight.healthPoint = knight.healthPoint - (x + y);
+                knight.check();
             }
         }
 
@@ -419,16 +421,19 @@ struct Events
 
             int rows, columns; fileIn >> rows >> columns;
 
-            for (int i = 0; i <= rows; ++i)
+            string s;
+            getline(fileIn, s);
+            for (int i = 0; i < rows; ++i)
             {
-                string s; getline(fileIn, s);
+                getline(fileIn, s);
                 stringstream ss(s);
                 int inp;
-                for (int j = 0; j < min(3, columns); ++j)
+                for (int j = 0; j < min(columns, columns); ++j)
                 {
-                    ss >> inp;
+                    ss >> inp; cout << inp << ' ';
                     pickUpItem(knight, inp);
                 }
+                cout << '\n';
             }
 
             fileIn.close();
@@ -440,7 +445,39 @@ struct Events
             fileIn.open(loot.lootFile[2]);
 
             knight.meetMerlin = true;
-            
+
+            int n; fileIn >> n;
+            string checkStr = "merlin";
+
+            for (int i = 0; i < n; ++i)
+            {
+                int ok[200];
+                for (int i = 0; i < 200; ++i) ok[i] = false;
+
+                string s;
+                fileIn >> s;
+                lowercase(s); 
+
+                for (int i = 0; i < s.length(); ++i) ok[s[i]] = true;
+                if (ok['m'] && ok['e'] && ok['r'] && ok['l'] && ok['i'] && ok['n']) 
+                    knight.healthPoint = min(maxHP, knight.healthPoint + 2);
+                
+                if (s.length() < 6) continue;
+                for (int i = 0; i < s.length() - 5; ++i)
+                {
+                    bool flag = true;
+                    for (int j = 0; j < 6; ++j)
+                    {
+                        if (s[i + j] != checkStr[j]) flag = false;
+                    }
+                    if (flag) 
+                    {
+                        knight.healthPoint = min(maxHP, knight.healthPoint + 1);;
+                        continue;
+                    }
+                }
+            }
+
             fileIn.close();
         }
 
@@ -459,6 +496,8 @@ struct Events
     void lookUp(Knights &knight, int index)
     {
         string sTmp = intToString(arr[index]);
+
+        cout << arr[index] << '\n';
 
         if (arr[index] == 0) 
             eventList.princessRescued(knight);
@@ -508,12 +547,13 @@ void adventureToKoopa(string file_input, int &healthPoint, int &level, int &reme
     dataInput(file_input, knight, events);
 
     int i = 0;
-    while (i <= events.num && knight.rescue == 0 && knight.healthPoint >= 0 && knight.continueable)
+    while (i < events.num && knight.rescue != 1 && knight.healthPoint >= 0 && knight.continueable)
     {
-        knight.display();
         events.lookUp(knight, ++i);
+        if (i == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
+        else if (i == events.num && knight.healthPoint < 0 && knight.continueable) knight.rescue = 0;
+        knight.display();
     }
-    if (i == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
-
-    knight.display();
 }
+    
+    
