@@ -412,7 +412,7 @@ struct Events
             }
         }
 
-        void meetAsclepius(Knights &knight)
+        void meetAsclepius(Knights &knight) // not working properly
         {   
             ifstream fileIn;
             fileIn.open(loot.lootFile[1]);
@@ -428,7 +428,7 @@ struct Events
                 getline(fileIn, s);
                 stringstream ss(s);
                 int inp;
-                for (int j = 0; j < min(columns, columns); ++j)
+                for (int j = 0; j < min(3, columns); ++j)
                 {
                     ss >> inp; cout << inp << ' ';
                     pickUpItem(knight, inp);
