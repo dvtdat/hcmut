@@ -1,34 +1,27 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
+const int inf = INT_MAX;
+
 int main()
 {
-    ifstream ip;
-    ip.open("tc1_mush_ghost");
-    
-    int n; ip >> n;
-    string a[100]; int i = 0;
-    string s; getline(ip, s); getline(ip, s);
+    int arr[4] = {1, 2, 3, 4};
+    int n = 4; 
 
-    stringstream ss(s);
-    
-    while (ss.good())
-    {
-        string tmp;
-        getline(ss, tmp, ',');
-        a[i++] = tmp;
-    }
-
+    int mx = -inf, mxIndex = -1, sMx = -inf, sMxIndex = -1;
     for (int i = 0; i < n; ++i)
     {
-        int tmp;
-        stringstream(a[i]) >> tmp;
-        cout << tmp + 10 << '\n';
+        if (mx < arr[i])
+        {
+            sMx = mx;
+            sMxIndex = mxIndex;
+
+            mx = arr[i];
+            mxIndex = i;
+        }
     }
 
-    
-    ip.close();
+    if (sMxIndex == -1) cout << "Cant found\n";
+    else cout << sMxIndex << ' ' << sMx << '\n';
 }

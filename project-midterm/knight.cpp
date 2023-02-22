@@ -265,12 +265,50 @@ struct Events
                     
             void mushTypeThree(int &minIndex, int &maxIndex)
             {
+                for (int i = 0; i < n; ++i)
+                {
+                    if (arr[i] < 0) arr[i] = -arr[i];
+                    arr[i] = (17 * arr[i] + 9) % 257;
+                }
 
+                int mn = inf, mx = -inf;
+                for (int i = 0; i < n; ++i)
+                {
+                    if (arr[i] < mn)
+                    {
+                        mn = arr[i]; minIndex = i;
+                    }
+
+                    if (arr[i] > mx)
+                    {
+                        mx = arr[i]; maxIndex = i;
+                    }
+                }
             }
 
-            void mushTypeFour(int &minIndex, int &maxIndex)
+            void mushTypeFour(int &mtMax, int &mtIndex)
             {
+                for (int i = 0; i < n; ++i)
+                {
+                    if (arr[i] < 0) arr[i] = -arr[i];
+                    arr[i] = (17 * arr[i] + 9) % 257;
+                }
 
+                int mx = -inf, mxIndex = -1, sMx = -inf, sMxIndex = -1;
+                for (int i = 0; i < n; ++i)
+                {
+                    if (mx < arr[i])
+                    {
+                        sMx = mx;
+                        sMxIndex = mxIndex;
+
+                        mx = arr[i];
+                        mxIndex = i;
+                    }
+                }
+
+                if (sMxIndex == -1 || sMxIndex > 2) mtMax = -5, mtIndex = -7;
+                else mtMax = sMx, mtIndex = sMxIndex;
             }
 
         } mushGhost;
@@ -367,7 +405,7 @@ struct Events
                 if (order[i] == 2) mushGhost.mushTypeTwo(x, y);
                 if (order[i] == 3) mushGhost.mushTypeThree(x, y);
                 if (order[i] == 4) mushGhost.mushTypeFour(x, y);
-
+                cout << x << ' ' << y << '\n';
                 knight.healthPoint = knight.healthPoint - (x + y);
             }
         }
@@ -445,8 +483,6 @@ struct Events
         if (arr[index] == 99) 
             eventList.meetBowser(knight);
     }
-
-
 } events;
 
 void dataInput(string file_input, Knights &knight, Events &events)
