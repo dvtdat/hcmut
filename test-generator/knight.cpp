@@ -92,12 +92,7 @@ struct Knights
 
     void display()
     {
-        cout << "HP=" << healthPoint;
-        cout << ", level=" << level;
-        cout << ", remedy=" << remedy;
-        cout << ", maidenkiss=" << maidenKiss;
-        cout << ", phoenixdown=" << phoenixDown;
-        cout << ", rescue=" << rescue << endl;
+        
     }
 
     struct Tiny
@@ -564,14 +559,25 @@ void adventureToKoopa(string file_input, int &healthPoint, int &level, int &reme
 
     //knight.display();
 
+    ofstream op; op.open("test.out");
     int index = 0;
     while (index < events.num && knight.rescue != 1 && knight.healthPoint >= 0 && knight.continueable)
     {
         events.lookUp(knight, ++index);
         if (index == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
         else if (index == events.num && knight.healthPoint < 0 && knight.continueable) knight.rescue = 0;
-        knight.display();
+        //knight.display();
+
+        
+        op << "HP=" << knight.healthPoint;
+        op << ", level=" << knight.level;
+        op << ", remedy=" << knight.remedy;
+        op << ", maidenkiss=" << knight.maidenKiss;
+        op << ", phoenixdown=" << knight.phoenixDown;
+        op << ", rescue=" << knight.rescue << endl;
+        
     }
+    op.close();
 }
     
     
