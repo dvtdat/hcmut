@@ -240,8 +240,9 @@ struct Events
                 for (int i = 0; i < n; ++i)
                 {
                     if (arr[i] < 0) transArr[i] = -transArr[i];
-                    transArr[i] = (17 * transArr[i] + 9) % 257;
+                    transArr[i] = (17 * transArr[i] + 9) % 257; //cout << transArr[i] << ' ';
                 }
+                //cout << '\n';
             }
 
             void mushTypeOne(int &minIndex, int &maxIndex)
@@ -293,19 +294,24 @@ struct Events
             void mushTypeFour(int &mtMax, int &mtIndex)
             {
                 int mx = -inf, mxIndex = -1, sMx = -inf, sMxIndex = -1;
-                for (int i = 0; i < n; ++i)
+                
+                for (int i = 0; i < 3; ++i)
                 {
-                    if (mx < transArr[i])
+                    if (transArr[i] > mx)
                     {
-                        sMx = mx;
-                        sMxIndex = mxIndex;
-
-                        mx = transArr[i];
-                        mxIndex = i;
+                        mx = transArr[i]; mxIndex = i;
                     }
                 }
 
-                if (sMxIndex == -1 || sMxIndex > 2) mtMax = -5, mtIndex = -7;
+                for (int i = 0; i < 3; ++i)
+                {
+                    if (transArr[i] > sMx && transArr[i] != mx)
+                    {
+                        sMx = transArr[i]; sMxIndex = i;
+                    }
+                }
+
+                if (sMxIndex == -1) mtMax = -5, mtIndex = -7;
                 else mtMax = sMx, mtIndex = sMxIndex;
             }
 
@@ -407,7 +413,7 @@ struct Events
                 if (order[i] == 3) mushGhost.mushTypeThree(x, y);
                 if (order[i] == 4) mushGhost.mushTypeFour(x, y);
                 
-                knight.healthPoint = knight.healthPoint - (x + y);
+                knight.healthPoint = min(maxHP, knight.healthPoint - (x + y));
                 knight.check();
             }
         }
@@ -421,19 +427,25 @@ struct Events
 
             int rows, columns; fileIn >> rows >> columns;
 
-            string s;
-            getline(fileIn, s);
+            int table[110][110];
             for (int i = 0; i < rows; ++i)
             {
-                getline(fileIn, s);
-                stringstream ss(s);
-                int inp;
-                for (int j = 0; j < min(3, columns); ++j)
+                for (int j = 0; j < columns; ++j) 
                 {
-                    ss >> inp; cout << inp << ' ';
-                    pickUpItem(knight, inp);
+                    fileIn >> table[i][j];
                 }
-                cout << '\n';
+            }   
+
+            for (int i = 0; i < rows; ++i)
+            {
+                int cnt = 0;
+                for (int j = 0; j < columns; ++j)
+                {
+                    int inp = table[i][j];
+                    if (!(16 <= inp && inp <= 18)) continue;  
+                    pickUpItem(knight, --inp); 
+                    if (++cnt == 3) break;
+                }
             }
 
             fileIn.close();
@@ -497,7 +509,7 @@ struct Events
     {
         string sTmp = intToString(arr[index]);
 
-        cout << arr[index] << '\n';
+        // cout << arr[index] << '\n';
 
         if (arr[index] == 0) 
             eventList.princessRescued(knight);
@@ -546,12 +558,14 @@ void adventureToKoopa(string file_input, int &healthPoint, int &level, int &reme
     initialSetUp();
     dataInput(file_input, knight, events);
 
-    int i = 0;
-    while (i < events.num && knight.rescue != 1 && knight.healthPoint >= 0 && knight.continueable)
+    //knight.display();
+
+    int index = 0;
+    while (index < events.num && knight.rescue != 1 && knight.healthPoint >= 0 && knight.continueable)
     {
-        events.lookUp(knight, ++i);
-        if (i == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
-        else if (i == events.num && knight.healthPoint < 0 && knight.continueable) knight.rescue = 0;
+        events.lookUp(knight, ++index);
+        if (index == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
+        else if (index == events.num && knight.healthPoint < 0 && knight.continueable) knight.rescue = 0;
         knight.display();
     }
 }
