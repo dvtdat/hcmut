@@ -9,13 +9,19 @@ const int minHP = 1, maxHP = 200;
 const int minLevel = 1, maxLevel = 2;
 const int minItem = 1, maxItem = 99;
 
+int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 13, 15, 16, 17, 11, 7, 6, 1};
 //int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 15, 16, 17, 18, 19, 99};
-int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 5, 4, 5, 3, 4, 4, 5, 5, 1};
-//int event[17] = {7, 7, 7, 6, 7, 7, 6, 7, 7, 6, 7, 6, 6, 6, 6, 6, 7};
+//int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 12, 12, 11, 11, 12, 12, 12, 12, 12};
+
 const int minEvent = 1, maxEvent = 16;
 
-const int minN = 10, maxN = 20;
-const int nTest = 200;
+const int minN = 45, maxN = 50;
+const int minM = 5, maxM = 10;
+
+const int minA = -99, maxA = 100; 
+const int minAdd = -10, maxAdd = 10;
+
+const int nTest = 100;
 
 mt19937 rd(chrono::steady_clock::now().time_since_epoch().count());
 #define rand rd
@@ -34,9 +40,12 @@ int main()
         maidenKiss = minItem + rand() & (maxItem - minItem + 1);
         phoenixDown = minItem + rand() & (maxItem - minItem + 1);
 
+        /*TEST FILE*/
         inp << healthPoint << ' ' << level << ' ' << remedy << ' ' << maidenKiss << ' ' << phoenixDown << '\n';
-
         int n = minN + rand() % (maxN - minN + 1);
+
+        
+
         for (int i = 1; i <= n; ++i)
         {
             int index = minEvent + rand() % (maxEvent - minEvent + 1);
@@ -48,10 +57,52 @@ int main()
             }
             else inp << event[index] << ' ';
         }
-
         inp << '\n';
-        inp << "tc1_mush_ghost,tc1_aclepius_pack,tc1_merlin_pack";
+        inp << "mushGhost.txt,aclepiusPack.txt,merlinPack.txt";
         inp.close();
+
+        /*MUSH GHOST FILE*/
+
+        ofstream inp2("mushGhost.txt");
+
+        int m = minM + rand() % (maxM - minM + 1);
+        inp2 << m << '\n';
+
+        int random = rand() % 3;
+        if (random == 0)
+        {
+            int out = minA + rand() % (maxA - minA + 1);
+            int add = minAdd + rand() % (maxAdd - minAdd + 1);
+            inp2 << out;
+            for (int i = 1; i < m; ++i)
+            {
+                out += add;
+                inp2 << ',' << min(maxA, max(minA, out));
+            }
+        }
+        else if (random == 1)
+        {
+            int out = minA + rand() % (maxA - minA + 1);
+            int add = rand() % maxAdd;
+            int idx = rand() % m;
+
+            inp2 << max(minA, out - add * (idx + 1));
+            for (int i = 1; i < idx - 1; ++i) inp2 << ',' << max(minA, out - add * (idx - i + 1));
+            inp2 << ',' << out;
+            for (int i = idx; i < m; ++i) inp2 << ',' << max(minA, out - add * (i - idx + 1));
+        }
+        else
+        {
+            int tmp = minA + rand() % (maxA - minA + 1);
+            inp2 << min(maxA, max(minA, tmp));
+            for (int i = 1; i < m; ++i)
+            {
+                tmp = minA + rand() % (maxA - minA + 1);
+                inp2 << ',' << min(maxA, max(minA, tmp));
+            }
+        }
+
+        inp2.close();
 
         system((NAME + ".exe " + TESTNAME + ".inp").c_str());
         system((NAME + "2.exe " + TESTNAME + ".inp").c_str());

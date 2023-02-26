@@ -154,7 +154,7 @@ struct Knights
             }
         }
 
-        if (healthPoint < 0)
+        if (healthPoint <= 0)
         {
             if (phoenixDown > 0)
             {            
@@ -242,8 +242,9 @@ struct Events
                 for (int i = 0; i < n; ++i)
                 {
                     if (arr[i] < 0) transArr[i] = -transArr[i];
-                    transArr[i] = (17 * transArr[i] + 9) % 257; 
+                    transArr[i] = (17 * transArr[i] + 9) % 257; //cout << transArr[i] << ' ';
                 }
+                //cout << '\n';
             }
 
             void mushTypeOne(int &minIndex, int &maxIndex)
@@ -271,7 +272,9 @@ struct Events
                 while (arr[x] < arr[x + 1]) x++;
                 while (arr[y - 1] > arr[y]) y--;
 
-                if (x != y) return; 
+                if (x >= n) x--;
+                if (y < 0) y++;
+                if (x != y) return;
                 mtMax = arr[x]; mtIndex = x;
             }
                     
@@ -334,7 +337,6 @@ struct Events
             if (knight.level == levelO) return;
 
             knight.healthPoint -= levelO * damage[type];
-            knight.check();
         }
 
         void meetShaman(Knights &knight, int index) 
@@ -347,6 +349,11 @@ struct Events
                 knight.level = min(maxLevel, knight.level + 2); return;
             }
             if (knight.level == levelO) return;
+
+            if (knight.remedy > 0)
+            {
+                knight.remedy--; return;
+            }
 
             knight.healthPoint = max(knight.healthPoint / 5, 1);
             knight.tiny.isTiny = true;
@@ -364,6 +371,11 @@ struct Events
             }
             if (knight.level == levelO) return;
 
+            if (knight.maidenKiss > 0)
+            {
+                knight.maidenKiss--; return;
+            }
+
             knight.prevLevel = knight.level;
             knight.level = 1;
             knight.frog.isFrog = true;
@@ -375,8 +387,6 @@ struct Events
             if (type == 15) knight.remedy = min(maxRemedy, knight.remedy + 1);
             if (type == 16) knight.maidenKiss = min(maxMaidenKiss, knight.maidenKiss + 1);
             if (type == 17) knight.phoenixDown = min(maxPhoenixDown, knight.phoenixDown + 1);
-
-            knight.check();
         }
 
         void pickUpMushMario(Knights &knight)
@@ -412,9 +422,21 @@ struct Events
                 if (order[i] == 2) mushGhost.mushTypeTwo(x, y);
                 if (order[i] == 3) mushGhost.mushTypeThree(x, y);
                 if (order[i] == 4) mushGhost.mushTypeFour(x, y);
+                //cout << x << ' ' << y << '\n';
                 
                 knight.healthPoint = min(maxHP, knight.healthPoint - (x + y));
-                knight.check();
+                if (knight.healthPoint <= 0)
+                {
+                    if (knight.phoenixDown > 0)
+                    {            
+                        knight.healthPoint = maxHP;
+                        knight.phoenixDown = max(minPhoenixDown, knight.phoenixDown - 1);
+                    }
+                    else 
+                    {
+                        knight.rescue = 0; return;
+                    }
+                }
             }
         }
 
@@ -517,11 +539,11 @@ struct Events
             eventList.meetMonster(knight, arr[index], index);
         if (arr[index] == 6) 
         {
-            eventList.meetShaman(knight, index); knight.check();
+            eventList.meetShaman(knight, index); 
         }
         if (arr[index] == 7) 
         {
-            eventList.meetSirenVajsh(knight, index); knight.check();
+            eventList.meetSirenVajsh(knight, index);
         }
         if (15 <= arr[index] && arr[index] <= 17) 
             eventList.pickUpItem(knight, arr[index]);
@@ -537,6 +559,8 @@ struct Events
             eventList.meetAsclepius(knight);
         if (arr[index] == 99) 
             eventList.meetBowser(knight);
+
+        knight.check();
     }
 } events;
 
@@ -559,17 +583,15 @@ void dataInput(string file_input, Knights &knight, Events &events)
 
 void adventureToKoopa(string file_input, int &healthPoint, int &level, int &remedy, int &maidenKiss, int &phoenixDown, int &rescue) 
 {
+    //freopen("test.out", "w", stdout);
     initialSetUp();
     dataInput(file_input, knight, events);
-
-    //knight.display();
-
     int index = 0;
-    while (index < events.num && knight.rescue != 1 && knight.healthPoint >= 0 && knight.continueable)
+    while (index < events.num && knight.rescue != 1 && knight.healthPoint > 0 && knight.continueable)
     {
         events.lookUp(knight, ++index);
-        if (index == events.num && knight.healthPoint >= 0 && knight.continueable) knight.rescue = 1;
-        else if (index == events.num && knight.healthPoint < 0 && knight.continueable) knight.rescue = 0;
+        if (index == events.num && knight.healthPoint > 0 && knight.continueable) knight.rescue = 1;
+        else if (index == events.num && knight.healthPoint <= 0 && knight.continueable) knight.rescue = 0;
         knight.display();
     }
 }

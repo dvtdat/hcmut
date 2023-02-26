@@ -44,7 +44,8 @@ void MushMario(int & HP, int & level, int & phoenixdown, int & HPmax) {
                     if (a>0) s1+=a;
                     a-=2;
                     }
-                HP = HP + (s1%100);
+                    //cout<<s1;
+                HP = HP + (s1%100)+1;
                 int flag=0;
                 while (flag==0)  {
                     for (int l=2; l<HP; l++)  {
@@ -58,11 +59,14 @@ void MushFibo(int &HP)  {
                 if (HP>1)  {
                     int arr[1000], m=2;
                     arr[0]=1; arr[1]=1;
-                    while (arr[m]<=HP)  {
+                    int k=1;
+                    while (k<HP)  {
                         arr[m]=arr[m-1]+arr[m-2];
+                        k=arr[m];
+                        //cout<<k<<" ";
                         m++;
                         }
-                    HP=arr[m-1];
+                    HP=arr[m-2];
                 }
                 else HP=1;
                 }
@@ -76,7 +80,6 @@ void Shaman(int &HP, int &level, int &levelO, int &remedy, int &tiny, int &frog,
             if ((level<levelO)&&name==3) {
                 if (remedy>0) {
                     remedy--;
-                    HP=(HP/5)*5;
                     }
                 else {
                     if (HP<5) HP=1;
@@ -258,7 +261,7 @@ void MushGhost(string file_other0, int &HP, int &HPmax, int &level, int &event, 
                 }
             else {
                 rescue=0;
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                //display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
                 return;
                 }
             }
@@ -326,7 +329,9 @@ void Readfile(string file_input, string &str3)  {
     }
 
 void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, int & maidenkiss, int & phoenixdown, int & rescue) {
+    
     freopen("test.ans", "w", stdout);
+
     int numberofevent=0;
     string file_other[5];
     string str3;
@@ -363,6 +368,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             }
         }
         if (name==0) name=2;
+        if (HP==1) name=3;
     }
     while (tc1 >> event) {
         if (event == 0) {
@@ -433,7 +439,14 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             }
         
 
-        if (frog>=0) frog++;
+        if (frog>=0) {
+            frog++;
+            if (HP<=0 && phoenixdown>=1)  {
+                phoenixdown--;
+                level=levelbefore;
+                frog=-1;
+                }
+            }
 
         if (tiny>=0) {
             tiny++;
@@ -455,7 +468,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             HP*=5;
             if (HP>HPmax) HP=HPmax;
             }
-
+//cout<<tiny<<"..."<<frog<<"...";
             if (HP > 0 && i<numberofevent) rescue = -1;
     if (HP<=0) rescue=0;
     if (HP>0 && i==numberofevent) rescue=1;
