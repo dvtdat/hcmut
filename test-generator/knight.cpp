@@ -490,17 +490,13 @@ struct Events
 
                 string s;
                 fileIn >> s;
-                lowercase(s); 
 
-                for (int i = 0; i < s.length(); ++i) ok[s[i]] = true;
-                if (ok['m'] && ok['e'] && ok['r'] && ok['l'] && ok['i'] && ok['n']) 
-                    knight.healthPoint = min(maxHP, knight.healthPoint + 2);
-                
                 if (s.length() < 6) continue;
                 for (int i = 0; i < s.length() - 5; ++i)
                 {
                     bool flag = true;
-                    for (int j = 0; j < 6; ++j)
+                    if (s[i] != 'm' && s[i] != 'M') break;
+                    for (int j = 1; j < 6; ++j)
                     {
                         if (s[i + j] != checkStr[j]) flag = false;
                     }
@@ -510,6 +506,13 @@ struct Events
                         continue;
                     }
                 }
+                
+                lowercase(s); 
+                for (int i = 0; i < s.length(); ++i) ok[s[i]] = true;
+                if (ok['m'] && ok['e'] && ok['r'] && ok['l'] && ok['i'] && ok['n']) 
+                    knight.healthPoint = min(maxHP, knight.healthPoint + 2);
+                
+
             }
 
             fileIn.close();

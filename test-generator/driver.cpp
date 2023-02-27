@@ -8,17 +8,17 @@ const string MERLIN = "merlinPack";
 const string ACLEPIUS = "aclepiusPack";
 const string MUSHGHOST = "mushGhostPack";
 
-const int nTest = 10;
+const int nTest = 100;
 
 /* Main File */
 const int minN = 20, maxN = 20;
 const int minM = 5, maxM = 10;
-const int minHP = 1, maxHP = 200;
+const int minHP = 997, maxHP = 997;
 const int minLevel = 1, maxLevel = 2;
 const int minItem = 1, maxItem = 99;
 
 const int minEvent = 1, maxEvent = 16;
-int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 13, 15, 16, 17, 19, 19, 19, 19};
+int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 1, 13, 15, 16, 17, 18, 19, 1};
 //int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 15, 16, 17, 18, 19, 99};
 //int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 12, 12, 11, 11, 12, 12, 12, 12, 12};
 
@@ -31,8 +31,11 @@ const int minA = -99, maxA = 100;
 const int minAdd = -10, maxAdd = 10;
 
 /* Merlin File */
-
-const string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*(){}[]<>;:~`";
+const int minCase = 10, maxCase = 20;
+//const string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const string str = "mmmaaaeeeeeerrrrlllliiiinnMEDFARRRMLINNNEADFFDAJFLAFFDSAFADFAF";
+const int minStr = 0, maxStr = 61;
+const int minLen = 30, maxLen = 60;
 
 mt19937 rd(chrono::steady_clock::now().time_since_epoch().count());
 #define rand rd
@@ -133,7 +136,19 @@ void aclepiusFile()
 void merlinFile()
 {
     ofstream inp((MERLIN + ".txt").c_str());
-
+    
+    int n = minCase + rand() % (maxCase - minCase + 1);
+    inp << n << '\n';
+    for (int i = 0; i < n; ++i)
+    {
+        int len = minLen + rand() % (maxLen - minLen + 1);
+        for (int j = 0; j < minLen; ++j)
+        {
+            inp << str[minStr + rand() % (maxStr - minStr + 1)];
+        }
+        if (rand() % 2) inp << "MerLin";
+        inp << '\n';
+    }
     inp.close();
 }
 
@@ -145,6 +160,7 @@ int main()
         mainFile();
         mushGhostFile();
         aclepiusFile();
+        merlinFile();
 
         /* CODE DRIVER */
 
