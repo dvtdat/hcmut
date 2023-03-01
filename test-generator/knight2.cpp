@@ -421,7 +421,6 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
         if (event==99)  {
             Bowser(level,name,HP,remedy,maidenkiss,phoenixdown,rescue);
             if (rescue==0) {
-                HP=0;
                 display(HP,level,remedy,maidenkiss,phoenixdown,rescue);
                 return;
                 }

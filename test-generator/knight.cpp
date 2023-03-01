@@ -51,7 +51,7 @@ void initialSetUp()
         prefixOdd[i] = prefixOdd[i - 1] + tmp;
     }
 
-    fibo[0] = 1, fibo[1] = 1;
+    fibo[0] = 1, fibo[1] = 1; isFibo[1] = 1;
     for (int i = 2; i <= 20; ++i)
     {
         fibo[i] = fibo[i - 1] + fibo[i - 2];
@@ -404,7 +404,7 @@ struct Events
             if (knight.healthPoint == 1) return;
             int i = knight.healthPoint - 1;
             while (!isFibo[i]) i--;
-            knight.healthPoint = i;
+            knight.healthPoint = i; 
         }
 
         void pickUpMushGhost(Knights &knight, string s)
@@ -457,7 +457,7 @@ struct Events
                     fileIn >> table[i][j];
                 }
             }   
-
+            // NOT DONE?? VỪA NHẶT VỪA DÙNG
             for (int i = 0; i < rows; ++i)
             {
                 int cnt = 0;
@@ -495,15 +495,15 @@ struct Events
                 for (int i = 0; i < s.length() - 5; ++i)
                 {
                     bool flag = true;
-                    if (s[i] != 'm' && s[i] != 'M') break;
+                    if (s[i] != 'm' && s[i] != 'M') continue;
                     for (int j = 1; j < 6; ++j)
                     {
                         if (s[i + j] != checkStr[j]) flag = false;
                     }
                     if (flag) 
                     {
-                        knight.healthPoint = min(maxHP, knight.healthPoint + 1);;
-                        continue;
+                        knight.healthPoint = min(maxHP, knight.healthPoint + 1);
+                        break;
                     }
                 }
                 
@@ -511,8 +511,6 @@ struct Events
                 for (int i = 0; i < s.length(); ++i) ok[s[i]] = true;
                 if (ok['m'] && ok['e'] && ok['r'] && ok['l'] && ok['i'] && ok['n']) 
                     knight.healthPoint = min(maxHP, knight.healthPoint + 2);
-                
-
             }
 
             fileIn.close();
@@ -541,13 +539,9 @@ struct Events
         if (1 <= arr[index] && arr[index] <= 5) 
             eventList.meetMonster(knight, arr[index], index);
         if (arr[index] == 6) 
-        {
             eventList.meetShaman(knight, index); 
-        }
         if (arr[index] == 7) 
-        {
             eventList.meetSirenVajsh(knight, index);
-        }
         if (15 <= arr[index] && arr[index] <= 17) 
             eventList.pickUpItem(knight, arr[index]);
         if (arr[index] == 11) 

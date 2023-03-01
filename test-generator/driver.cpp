@@ -11,15 +11,13 @@ const string MUSHGHOST = "mushGhostPack";
 const int nTest = 100;
 
 /* Main File */
-const int minN = 20, maxN = 20;
-const int minM = 5, maxM = 10;
-const int minHP = 997, maxHP = 997;
-const int minLevel = 1, maxLevel = 2;
+const int minN = 10, maxN = 10;
+const int minHP = 100, maxHP = 200;
+const int minLevel = 1, maxLevel = 10;
 const int minItem = 1, maxItem = 99;
 
-const int minEvent = 1, maxEvent = 16;
-int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 1, 13, 15, 16, 17, 18, 19, 1};
-//int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 15, 16, 17, 18, 19, 99};
+const int minEvent = 1, maxEvent = 10;
+int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 15, 16, 17, 18, 19, 99};
 //int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 12, 12, 11, 11, 12, 12, 12, 12, 12};
 
 /* Aclepius File */
@@ -27,13 +25,13 @@ const int minArr = 5, maxArr = 10;
 const int minVal = 10, maxVal = 20;
 
 /* Mush Ghost File*/
+const int minM = 5, maxM = 10;
 const int minA = -99, maxA = 100; 
 const int minAdd = -10, maxAdd = 10;
 
 /* Merlin File */
 const int minCase = 10, maxCase = 20;
-//const string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-const string str = "mmmaaaeeeeeerrrrlllliiiinnMEDFARRRMLINNNEADFFDAJFLAFFDSAFADFAF";
+const string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const int minStr = 0, maxStr = 61;
 const int minLen = 30, maxLen = 60;
 
@@ -61,9 +59,9 @@ void mainFile()
         {
             inp << event[index];
             for (int j = 0; j < 4; ++j) inp << 1 + rand() % 4;
-            inp << ' ';
         }
-        else inp << event[index] << ' ';
+        else inp << event[index];
+        if (i != n) inp << ' ';
     }
     inp << '\n';
     inp << (MUSHGHOST + ".txt," + ACLEPIUS + ".txt," + MERLIN + ".txt").c_str();
@@ -146,7 +144,9 @@ void merlinFile()
         {
             inp << str[minStr + rand() % (maxStr - minStr + 1)];
         }
-        if (rand() % 2) inp << "MerLin";
+        if (rand() % 2) inp << "mErLin";
+        if (rand() % 2) inp << "merlin";
+        if (rand() % 2) inp << "Merlin";
         inp << '\n';
     }
     inp.close();

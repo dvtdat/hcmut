@@ -490,26 +490,27 @@ struct Events
 
                 string s;
                 fileIn >> s;
-                lowercase(s); 
 
-                for (int i = 0; i < s.length(); ++i) ok[s[i]] = true;
-                if (ok['m'] && ok['e'] && ok['r'] && ok['l'] && ok['i'] && ok['n']) 
-                    knight.healthPoint = min(maxHP, knight.healthPoint + 2);
-                
                 if (s.length() < 6) continue;
                 for (int i = 0; i < s.length() - 5; ++i)
                 {
                     bool flag = true;
-                    for (int j = 0; j < 6; ++j)
+                    if (s[i] != 'm' && s[i] != 'M') continue;
+                    for (int j = 1; j < 6; ++j)
                     {
                         if (s[i + j] != checkStr[j]) flag = false;
                     }
                     if (flag) 
                     {
-                        knight.healthPoint = min(maxHP, knight.healthPoint + 1);;
-                        continue;
+                        knight.healthPoint = min(maxHP, knight.healthPoint + 1);
+                        break;
                     }
                 }
+                
+                lowercase(s); 
+                for (int i = 0; i < s.length(); ++i) ok[s[i]] = true;
+                if (ok['m'] && ok['e'] && ok['r'] && ok['l'] && ok['i'] && ok['n']) 
+                    knight.healthPoint = min(maxHP, knight.healthPoint + 2);
             }
 
             fileIn.close();
@@ -583,9 +584,10 @@ void dataInput(string file_input, Knights &knight, Events &events)
 
 void adventureToKoopa(string file_input, int &healthPoint, int &level, int &remedy, int &maidenKiss, int &phoenixDown, int &rescue) 
 {
-    //freopen("test.out", "w", stdout);
     initialSetUp();
     dataInput(file_input, knight, events);
+
+    //knight.display();
     int index = 0;
     while (index < events.num && knight.rescue != 1 && knight.healthPoint > 0 && knight.continueable)
     {
