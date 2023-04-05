@@ -1,7 +1,7 @@
 #include "knight.h"
 
 const int inf = 2e9 +7;
-int event[200010]; int MaxHP = 999, MaxLevel = 10, MaxRemedy = 99, MaxMaidenkiss = 99, MaxPhoenixdown = 99; 
+int event[1000]; int MaxHP = 999, MaxLevel = 10, MaxRemedy = 99, MaxMaidenkiss = 99, MaxPhoenixdown = 99; 
 string file_pack[10];
 
 void Lowercase(string &pack)
@@ -249,9 +249,13 @@ void check_Mush_Ghost(int event13, int &HP)
                     }
                     for (int t = 0; t < 3; t++)
                     {
-                        if (TransArr[t] != maxValue2 && TransArr[t] >= max2_3x)
+                        if (TransArr[t] != maxValue2 && TransArr[t] > max2_3x)
                         {
                             max2_3x = TransArr[t];
+                            max2_3i = t;
+                        }
+                        if (TransArr[t] == max2_3x && t < max2_3i) 
+                        {
                             max2_3i = t;
                         }
                     }
@@ -269,7 +273,7 @@ bool findMerlin(string s, string s1)
     for (int i = 0; i < s.length(); i++)
     {
         int j = 0; string tmp;
-        while (j < s1.length()) 
+        while (j < s1.length())
         {
             tmp += s[i+j];
             j++;
@@ -340,33 +344,36 @@ void eventcheck(string s, int &HP, int &level, int &remedy, int &maidenkiss, int
             if (flag999 || Lancelot) 
             {
                 level++; 
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                continue;
+                // if (rescue == -1 && i == k - 1) rescue = 1;
+                // display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                // continue;
             }
-            int b = (i + 1) % 10; 
-            int levelIO = i + 1; // tính level của đối thủ
-            (levelIO > 6) ? ((b > 5) ? b : 5) : b; 
-            if (level > levelIO && level < 10) level++; //win
-            else if (level == levelIO) 
-            {
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                continue;
-            } //draw
-            else if (level < levelIO)  //lose
-            {
-                int tmp; tmp = event[i]; 
-                HP = HP - event1_5damage(tmp,levelIO);
-            }
-            if (HP <= 0 && phoenixdown == 0) 
-            {
-                rescue = 0; 
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                break;
-            }
-            else if (HP <=0 && phoenixdown > 0)
-            {
-                HP = MaxHP;
-                phoenixdown--;
+            else {
+                int b = (i + 1) % 10; 
+                int levelIO = i + 1; // tính level của đối thủ
+                (levelIO > 6) ? ((b > 5) ? b : 5) : b; 
+                if (level > levelIO && level < 10) level++; //win
+                // else if (level == levelIO) 
+                // {
+                //     display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                //     continue;
+                // } //draw
+                else if (level < levelIO)  //lose
+                {
+                    int tmp; tmp = event[i]; 
+                    HP = HP - event1_5damage(tmp,levelIO);
+                }
+                if (HP <= 0 && phoenixdown == 0) 
+                {
+                    rescue = 0; 
+                    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                    break;
+                }
+                else if (HP <=0 && phoenixdown > 0)
+                {
+                    HP = MaxHP;
+                    phoenixdown--;
+                }
             }
         } 
         //gap ma su kien = 6
@@ -375,39 +382,44 @@ void eventcheck(string s, int &HP, int &level, int &remedy, int &maidenkiss, int
             if (flag999 || Lancelot) 
             {
                 level++;
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue); 
-                continue;
+                // if (rescue == -1 && i == k - 1) rescue = 1;
+                // display(HP, level, remedy, maidenkiss, phoenixdown, rescue); 
+                // continue;
             }
-            int levelIO = i + 1;
-            if (level > levelIO) 
-            {
-                level = level + 2; 
-                if (level > 10) level = 10;
-            }
-            else if (level == levelIO) 
-            {
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                continue;
-            }
-            else if (level < levelIO) // hiep si thua va o trang thai ti hon (giu nguyen current HP va MaxHP)
-            {
-                flagevent6 = i + 3;
-                currentHP = HP;
-                if (HP >= 5) HP = HP/5;
-                else HP = 1;
-                if (remedy >= 1)
-                { 
-                    remedy--;
-                    HP = currentHP;
-                    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                    continue;
-                }
-                if (HP <= 0 && phoenixdown > 0) 
+            else {
+                int levelIO = i + 1;
+                if (level > levelIO) 
                 {
-                    HP = MaxHP;
-                    phoenixdown--;
-                    display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                    continue;
+                    level = level + 2; 
+                    if (level > 10) level = 10;
+                }
+                // else if (level == levelIO) 
+                // {
+                //     display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                //     continue;
+                // }
+                else if (level < levelIO) // hiep si thua va o trang thai ti hon (giu nguyen current HP va MaxHP)
+                {
+                    flagevent6 = i + 3;
+                    currentHP = HP;
+                    if (HP >= 5) HP = HP/5;
+                    else HP = 1;
+                    if (remedy >= 1)
+                    { 
+                        flagevent6 = -1;
+                        remedy--;
+                        HP = currentHP;
+                        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                        continue;
+                    }
+                    if (HP <= 0 && phoenixdown > 0) 
+                    {
+                        flagevent6 = -1;
+                        HP = MaxHP;
+                        phoenixdown--;
+                        display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                        continue;
+                    }
                 }   
             }   
         }
@@ -417,29 +429,32 @@ void eventcheck(string s, int &HP, int &level, int &remedy, int &maidenkiss, int
             if (flag999 || Lancelot) 
             {
                 level++; 
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                continue;
+                // if (rescue == -1 && i == k - 1) rescue = 1;
+                // display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                // continue;
             }
-            int levelIO = i + 1;
-            if (level > levelIO) 
-            {
-                level = level + 2;
-                if (level > 10) level = 10;
-            }
-            else if (level == levelIO) 
-            {
-                display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
-                continue;
-            }
-            else if (level < levelIO) 
-            {
-                currentLevel = level;
-                flagevent7 == i + 3;
-                level = 1;
-                if (maidenkiss > 0)
+            else {
+                int levelIO = i + 1;
+                if (level > levelIO) 
                 {
-                    maidenkiss--;
-                    level = currentLevel;
+                    level = level + 2;
+                    if (level > 10) level = 10;
+                }
+                // else if (level == levelIO) 
+                // {
+                //     display(HP, level, remedy, maidenkiss, phoenixdown, rescue);
+                //     continue;
+                // }
+                else if (level < levelIO) 
+                {
+                    currentLevel = level;
+                    flagevent7 == i + 3;
+                    level = 1;
+                    if (maidenkiss > 0)
+                    {
+                        maidenkiss--;
+                        level = currentLevel;
+                    }
                 }
             }
         }
@@ -452,22 +467,20 @@ void eventcheck(string s, int &HP, int &level, int &remedy, int &maidenkiss, int
                 intial -= 2;
             }
             HP = HP + (s1 % 100);
-            int checkPrimeHP = HP; bool flag = false;
-            if (checkPrimeHP == 1) {checkPrimeHP = 2;}
-            else if (checkPrimeHP == 2) {checkPrimeHP = 3;}
-            else {
-                while (flag != true)
+            int checkPrimeHP = HP; int flag = 0;
+            while (flag == 0)
+            {
+                if (checkHPisprime(checkPrimeHP) != 1)
                 {
-                    int cntcheck = 0;
-                    flag = true;
-                    for (int i = 2; i <= checkPrimeHP/2 + 1; i++) 
-                    {
-                        if(checkPrimeHP % i == 0) flag = false;
-                        cntcheck++;
-                    }
-                    if (cntcheck == 0) flag = false;
+                    checkPrimeHP++;
+                    flag = 0;
+                }
+                else if (checkHPisprime(HP) == 1) // if HP itself is a prime number then add to the nearest primenumber
+                {
+                    flag = 0;
                     checkPrimeHP++;
                 }
+                else flag = 1;
             }
             HP = checkPrimeHP;
             if (HP > MaxHP) HP = MaxHP;

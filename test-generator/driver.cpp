@@ -8,32 +8,33 @@ const string MERLIN = "merlinPack";
 const string ACLEPIUS = "aclepiusPack";
 const string MUSHGHOST = "mushGhostPack";
 
-const int nTest = 100;
+const int nTest = 50;
 
 /* Main File */
-const int minN = 10, maxN = 10;
-const int minHP = 100, maxHP = 200;
-const int minLevel = 1, maxLevel = 10;
-const int minItem = 1, maxItem = 99;
+const int minN = 10, maxN = 20;
+const int minHP = 1, maxHP = 999;
+const int minLevel = 1, maxLevel = 1;
+const int minItem = 0, maxItem = 0;
 
-const int minEvent = 1, maxEvent = 10;
+const int minEvent = 1, maxEvent = 16;
 int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 15, 16, 17, 18, 19, 99};
 //int event[17] = {0, 1, 2, 3, 4, 5, 6, 7, 12, 12, 11, 11, 12, 12, 12, 12, 12};
 
 /* Aclepius File */
-const int minArr = 5, maxArr = 10;
+const int minArr = 1, maxArr = 100;
 const int minVal = 10, maxVal = 20;
 
 /* Mush Ghost File*/
-const int minM = 5, maxM = 10;
+const int minM = 1, maxM = 30;
 const int minA = -99, maxA = 100; 
 const int minAdd = -10, maxAdd = 10;
+const int minMushGhost = 1, maxMushGhost = 5;
 
 /* Merlin File */
-const int minCase = 10, maxCase = 20;
+const int minCase = 5, maxCase = 50;
 const string str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const int minStr = 0, maxStr = 61;
-const int minLen = 30, maxLen = 60;
+const int minLen = 20, maxLen = 20;
 
 mt19937 rd(chrono::steady_clock::now().time_since_epoch().count());
 #define rand rd
@@ -58,7 +59,8 @@ void mainFile()
         if (event[index] == 13)
         {
             inp << event[index];
-            for (int j = 0; j < 4; ++j) inp << 1 + rand() % 4;
+            int lenMushGhost = minMushGhost + rand() % (maxMushGhost - minMushGhost + 1);
+            for (int j = 0; j < lenMushGhost; ++j) inp << 1 + rand() % 4;
         }
         else inp << event[index];
         if (i != n) inp << ' ';
@@ -119,7 +121,7 @@ void aclepiusFile()
     int n = minArr + rand() % (maxArr - minArr + 1);
     int m = minArr + rand() % (maxArr - minArr + 1);
 
-    inp << n << ' ' << m << '\n';
+    inp << n << '\n' << m << '\n';
     for (int i = 0; i < n; ++i)
     {
         for (int j = 0; j < m; ++j)

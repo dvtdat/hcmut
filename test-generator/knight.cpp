@@ -1,7 +1,5 @@
 #include "knight.h"
 
-// JUST PLEASE BE DONE WITH THE CONSTRAINS
-
 const int inf = 2e9 + 7;
 const int maxN = 200010;
 
@@ -73,7 +71,7 @@ struct Knights
     int healthPoint, level, remedy, maidenKiss, phoenixDown;
     int rescue = -1;
 
-    int prevLevel = 1;
+    int prevLevel = -1;
     bool isArthur = false, isLancelot = false;
     bool continueable = true;
     
@@ -91,7 +89,7 @@ struct Knights
     }
 
     void display()
-    {
+    {  
         cout << "HP=" << healthPoint;
         cout << ", level=" << level;
         cout << ", remedy=" << remedy;
@@ -114,7 +112,7 @@ struct Knights
 
     void check()
     {
-        if (tiny.isTiny)
+        if (tiny.isTiny && healthPoint > 0)
         {
             if (remedy) 
             {
@@ -159,7 +157,15 @@ struct Knights
             if (phoenixDown > 0)
             {            
                 healthPoint = maxHP;
-                phoenixDown = max(minPhoenixDown, phoenixDown - 1); return;
+                phoenixDown = max(minPhoenixDown, phoenixDown - 1); 
+                
+                frog.isFrog = false;
+                if (prevLevel > 0) level = prevLevel;
+                frog.duration = 0;
+                
+                tiny.isTiny = false;
+                tiny.duration = 0;
+                return;
             }
             rescue = 0;
         }
@@ -297,9 +303,10 @@ struct Events
 
             void mushTypeFour(int &mtMax, int &mtIndex)
             {
+
                 int mx = -inf, mxIndex = -1, sMx = -inf, sMxIndex = -1;
                 
-                for (int i = 0; i < 3; ++i)
+                for (int i = 0; i < min(n, 3); ++i)
                 {
                     if (transArr[i] > mx)
                     {
@@ -307,7 +314,7 @@ struct Events
                     }
                 }
 
-                for (int i = 0; i < 3; ++i)
+                for (int i = 0; i < min(n, 3); ++i)
                 {
                     if (transArr[i] > sMx && transArr[i] != mx)
                     {
@@ -425,6 +432,7 @@ struct Events
                 //cout << x << ' ' << y << '\n';
                 
                 knight.healthPoint = min(maxHP, knight.healthPoint - (x + y));
+        
                 if (knight.healthPoint <= 0)
                 {
                     if (knight.phoenixDown > 0)
@@ -457,7 +465,6 @@ struct Events
                     fileIn >> table[i][j];
                 }
             }   
-            // NOT DONE?? VỪA NHẶT VỪA DÙNG
             for (int i = 0; i < rows; ++i)
             {
                 int cnt = 0;
@@ -535,27 +542,34 @@ struct Events
         // cout << arr[index] << '\n';
 
         if (arr[index] == 0) 
+        {
             eventList.princessRescued(knight);
+            knight.display();
+            return;
+        }
         if (1 <= arr[index] && arr[index] <= 5) 
             eventList.meetMonster(knight, arr[index], index);
-        if (arr[index] == 6) 
+        else if (arr[index] == 6) 
             eventList.meetShaman(knight, index); 
-        if (arr[index] == 7) 
+        else if (arr[index] == 7) 
             eventList.meetSirenVajsh(knight, index);
-        if (15 <= arr[index] && arr[index] <= 17) 
+        else if (15 <= arr[index] && arr[index] <= 17) 
             eventList.pickUpItem(knight, arr[index]);
-        if (arr[index] == 11) 
+        else if (arr[index] == 11) 
             eventList.pickUpMushMario(knight);
-        if (arr[index] == 12) 
+        else if (arr[index] == 12) 
             eventList.pickUpMushFibo(knight);
-        if (sTmp[0] == '1' && sTmp[1] == '3')
+        else if (sTmp[0] == '1' && sTmp[1] == '3')
             eventList.pickUpMushGhost(knight, sTmp);
-        if (arr[index] == 18 && !knight.meetMerlin) 
+        else if (arr[index] == 18 && !knight.meetMerlin) 
             eventList.meetMerlin(knight);
-        if (arr[index] == 19 && !knight.meetAclepius) 
+        else if (arr[index] == 19 && !knight.meetAclepius) 
             eventList.meetAsclepius(knight);
-        if (arr[index] == 99) 
+        else if (arr[index] == 99)
+        {
             eventList.meetBowser(knight);
+            if (knight.continueable == 0) return;
+        }
 
         knight.check();
     }
@@ -580,7 +594,7 @@ void dataInput(string file_input, Knights &knight, Events &events)
 
 void adventureToKoopa(string file_input, int &healthPoint, int &level, int &remedy, int &maidenKiss, int &phoenixDown, int &rescue) 
 {
-    freopen("test.out", "w", stdout);
+    //freopen("test.out", "w", stdout);
 
     initialSetUp();
     dataInput(file_input, knight, events);
@@ -592,7 +606,7 @@ void adventureToKoopa(string file_input, int &healthPoint, int &level, int &reme
         events.lookUp(knight, ++index);
         if (index == events.num && knight.healthPoint > 0 && knight.continueable) knight.rescue = 1;
         else if (index == events.num && knight.healthPoint <= 0 && knight.continueable) knight.rescue = 0;
-        knight.display();
+        if (events.arr[index] != 0) knight.display();
     }
 }
     

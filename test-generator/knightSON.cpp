@@ -17,6 +17,37 @@ void display(int HP, int level, int remedy, int maidenkiss, int phoenixdown, int
         << ", rescue=" << rescue << endl;
 }
 
+void use_remedy(int &HP,int max_HP,int &remedy,int &turn_left,bool &small)
+{
+    HP=min(HP*5,max_HP);
+    remedy--;
+    turn_left=0;
+    small=0;
+}
+
+void use_maidenkiss(int &level,int prev_level,int &maidenkiss, int &turn_left2,bool &frog)
+{
+    level=prev_level;
+    maidenkiss--;
+    turn_left2=0;
+    frog=0;
+}
+
+void use_phoenixdown(int &HP,int max_HP, int &phoenixdown, bool &frog, bool &small, int &round_left,int &round_left2,int &level, int&prev_level)
+{
+    if (phoenixdown>0)
+    {
+        if (frog==1)    level=prev_level;
+        phoenixdown--;  
+        frog=0;
+        small=0;
+        HP=max_HP;  
+        round_left2=0;      
+        round_left=0;
+
+    }
+}
+
 void combat(int index,int ev_i, int &HP, int &level, int &phoenixdown,int max_HP)
 {
     int b=index%10;
@@ -32,15 +63,14 @@ void combat(int index,int ev_i, int &HP, int &level, int &phoenixdown,int max_HP
         hp1 -= damage;
         //debug(damage);
         HP=(int)hp1;
-        if (HP<0 && phoenixdown>0)
-            {HP=max_HP;  phoenixdown--;}
+        //debug(HP); 
     }
-    //debug(HP);  
+ 
 }
 
 void shaman(int index, int ev_i,int &HP,int &level,int &remedy, int &max_HP,int &round_left, bool &small,bool frog)
 {
-    if (frog==1)   return;
+    if (frog==1 || small==1)   return;
     int b=index%10;
     int levelO= index > 6?(b>5?b:5) : b;
     //debug(levelO);
@@ -52,7 +82,11 @@ void shaman(int index, int ev_i,int &HP,int &level,int &remedy, int &max_HP,int 
         if (round_left==0 && small==1)
         {
             if (remedy>0)
-            {remedy--;  small=0;   return;}
+            {   remedy--;
+                round_left=0;
+                small=0;
+                return;
+            }
             round_left=4;         HP/=5;
             if (HP==0)  HP=1;   
         }
@@ -61,12 +95,12 @@ void shaman(int index, int ev_i,int &HP,int &level,int &remedy, int &max_HP,int 
 
 void siren(int index,int ev_i,int &HP, int &level,int &maidenkiss,int &prev_level, int &round_left2, bool &frog,bool small)
 {
-    if (small==1)   return;
+    if (small==1 || frog==1)   return;
     int b=index%10;
     int levelO= index > 6?(b>5?b:5) : b;
     //debug(levelO);
     if (!frog)
-        prev_level=level;
+        {prev_level=level;}
     if (level> levelO)
         level=min(10,level+2);
     if (level < levelO)
@@ -75,7 +109,7 @@ void siren(int index,int ev_i,int &HP, int &level,int &maidenkiss,int &prev_leve
         if (round_left2==0 && frog==1)
         {
             if (maidenkiss>0)
-            {maidenkiss--;  frog=0;   return;}
+            {use_maidenkiss(level,prev_level,maidenkiss,round_left2,frog);   return;}
             round_left2=4;         level=1;   
         }
     }
@@ -97,7 +131,7 @@ void mush_fibo(int &HP)
     }
 }
 
-void mush_ghost_1(int n2,int *mush,int &HP)
+void mush_ghost_1(int n2,int *mush,int &HP,int max_HP)
 {
     int maxx=-1e9,minn=1e9,maxi,mini;
     for (int i=0;i<n2;i++)
@@ -106,11 +140,13 @@ void mush_ghost_1(int n2,int *mush,int &HP)
     for (int i=0;i<n2;i++)
         if (minn>=mush[i])
            {minn=mush[i];  mini=i;}
-    //debug(maxi);    debug(mini);
+/*     debug(HP);
+    debug(maxi);    debug(mini);   */
     HP-=(maxi+mini);
+    HP=min(HP,max_HP);
 }
 
-void mush_ghost_2(int n2,int *mush,int &HP)
+void mush_ghost_2(int n2,int *mush,int &HP,int max_HP)
 {
     auto find_pos_max=[](int n2,int *mush){
         int maxx=-1e9,maxi;
@@ -121,10 +157,10 @@ void mush_ghost_2(int n2,int *mush,int &HP)
     }; 
     int peak=find_pos_max(n2,mush);
     auto check_peak=[](int n2,int *mush,int peak){
-        for (int i=peak-1;i>0;i--)
+        for (int i=peak;i>0;i--)
             if (mush[i-1]>=mush[i])
                 return 0;
-        for (int i=peak+1;i<n2-1;i++)
+        for (int i=peak;i<n2-1;i++)
             if (mush[i]<=mush[i+1])
                 return 0;
         return 1;
@@ -133,18 +169,21 @@ void mush_ghost_2(int n2,int *mush,int &HP)
     if (flag==0)
         mtx=-2,mti=-3;
     else mtx=peak,mti=mush[peak];
+/*     debug(mtx);
+    debug(mti);  */
     HP-=(mtx+mti);
+    HP=min(HP,max_HP);
 }
 
-void mush_ghost_3(int n2,int *mush,int &HP)
+void mush_ghost_3(int n2,int *mush,int &HP,int max_HP)
 {
     for (int i=0;i<n2;i++)
     {
         mush[i]= mush[i]<0? -mush[i] : mush[i];
         mush[i]= (17*mush[i]+9)%257;
     }
-    //cout<<"mush_ghost_3"<<endl;
-    //_debug;       
+/*     cout<<"mush_ghost_3"<<endl;
+    _debug;      */   
     int maxx=-1e9,minn=1e9,maxi2,mini2;
     for (int i=0;i<n2;i++)
         if  (maxx<mush[i])
@@ -153,14 +192,15 @@ void mush_ghost_3(int n2,int *mush,int &HP)
         if  (minn>mush[i])
             {minn=mush[i];  mini2=i;}
     HP-=(maxi2+mini2);
+    HP=min(HP,max_HP);
     
-/*      for (int i=0;i<n2;i++)
+/*     for (int i=0;i<n2;i++)
         cout<<"mush["<<i<<"]="<<mush[i]<<" ";   
     cout<<endl;  
-    debug(HP); */
+    debug(HP);  */
 }
 
-void mush_ghost_4(int n2,int *mush, int &HP)
+void mush_ghost_4(int n2,int *mush, int &HP,int max_HP)
 {
     for (int i=0;i<n2;i++)
     {
@@ -168,11 +208,20 @@ void mush_ghost_4(int n2,int *mush, int &HP)
         mush[i]= (17*mush[i]+9)%257;
     }
 /*     cout<<"mush_ghost_4: "<<endl;
-    _debug; */
+    _debug;  
     
-    //debug(HP);
+    debug(HP); */
     auto check=[](int n2,int *mush){
-        if (n2<3 ||  (mush[1]==mush[2] && mush[0]==mush[1]))
+        if (n2==1)
+            return -1;
+        else if (n2==2 && mush[0]==mush[1])
+            return -1;
+        else if (n2==2)
+        {
+            if (mush[0]>mush[1])    return 1;
+            return 0;
+        }
+        else if (n2>=3 &&  (mush[1]==mush[2] && mush[0]==mush[1]))
             return -1;
         int first=-1e9,second=-1e9,second_i,first_i;
         for (int i=0;i<=2;i++)
@@ -191,20 +240,17 @@ void mush_ghost_4(int n2,int *mush, int &HP)
     };
 
     int max2_3i=check(n2,mush), max2_3x=mush[max2_3i];
-        //debug(max2_3i);
-    HP-=(max2_3x+max2_3i);
-    //debug(HP); 
+//    debug(max2_3i); debug(max2_3x);
+    if (max2_3i==-1)
+        HP=min(HP+12,max_HP);
+    else
+        {  
+         HP-=(max2_3x+max2_3i);}
+    HP=min(HP,max_HP);
+//    debug(HP); 
 }
 
-void use_phoenixdown(int &HP,int max_HP, int &phoenixdown, bool &frog, bool &small)
-{
-    if (phoenixdown >0)
-    {
-        phoenixdown--;  frog=0; small=0;
-    }
-}
-
-void mush_ghost(int number_of_event,string evi, int &HP,int max_HP,int &phoenixdown, string file_name,bool &frog, bool &small)
+void mush_ghost(int number_of_event,string evi, int &HP,int max_HP,int &phoenixdown, string file_name,bool &frog, bool &small,int &round_left,int &round_left2,int &level,int &prev_level)
 {
     /*  READ FILE */
     ifstream fin_ghost(file_name);
@@ -227,28 +273,27 @@ void mush_ghost(int number_of_event,string evi, int &HP,int max_HP,int &phoenixd
     for (int i=2;i<evi.size();i++)
     {
         if (evi[i]=='1')
-            mush_ghost_1(n2,mush,HP);
+            mush_ghost_1(n2,mush,HP,max_HP);
         if (evi[i]=='2')
-            mush_ghost_2(n2,mush,HP);
+            mush_ghost_2(n2,mush,HP,max_HP);
         if (evi[i]=='3')
         {
             for (int i=0;i<n2;i++)
                 processing_mush[i]=mush[i];
-            mush_ghost_3(n2,processing_mush,HP);
+            mush_ghost_3(n2,processing_mush,HP,max_HP);
         }
         if (evi[i]=='4'){
             for (int i=0;i<n2;i++)
                 processing_mush[i]=mush[i];
-            mush_ghost_4(n2,processing_mush,HP);
-        }
-            
-        if (HP<0 && phoenixdown>0)      // can use
-            {HP= max_HP;   use_phoenixdown(HP,max_HP,phoenixdown,frog,small);}
-        else if (HP<0 && phoenixdown==0)
+            mush_ghost_4(n2,processing_mush,HP,max_HP);
+        } 
+        if (HP<=0 && phoenixdown>0)      // can use
+            {HP= max_HP;   use_phoenixdown(HP,max_HP,phoenixdown,frog,small,round_left,round_left2,level,prev_level);}
+        else if (HP<=0 && phoenixdown==0)
             return;
 /*         cout<<"finish event:"<<evi[i]<<" "<<endl;
         _debug;
-        debug(HP); */
+        debug(HP);  */          
     }
 }
 
@@ -257,9 +302,12 @@ void loot_asclepius(int &remedy, int &maidenkiss, int &phoenixdown, string file_
     ///READ FILE
     ifstream  fin_as(file_name);
     int r1,c1;
-    fin_as>>r1>>c1;
+    string _r1,_r2;
+    getline(fin_as,_r1);
+    getline(fin_as,_r2);
     /* ---------------------------------- */
-
+    r1=stoi(_r1);
+    c1=stoi(_r2);
     for (int i=0;i<r1;i++)
     {
         string _line;
@@ -271,18 +319,13 @@ void loot_asclepius(int &remedy, int &maidenkiss, int &phoenixdown, string file_
         {
             as>>item;
             if (c==3)   break;
-            if (item=="15")
-                {remedy=min(remedy+1,99);    c++;}
             if (item=="16")
-                {maidenkiss=min(maidenkiss+1,99);   c++;}
+                {remedy=min(remedy+1,99);    c++;  }
             if (item=="17")
-                {phoenixdown=min(phoenixdown+1,99);  c++;}
-            
+                {maidenkiss=min(maidenkiss+1,99);   c++;            }
+            if (item=="18")
+                {phoenixdown=min(phoenixdown+1,99);  c++;           }
         }
-        if (frog)
-        {frog=0;       maidenkiss--;}
-        if (small)
-        {small=0;      remedy--;}
     }
 }
 
@@ -293,7 +336,7 @@ void meet_merlin(int &HP, int &max_HP,string file_name)
     fin_merlin>>n9;
 
     auto check= [](string name){
-        if (name=="Merlin" || name=="merlin")
+        if (name.find("Merlin") != string::npos || name.find("merlin")!=string::npos)
             return 3;
         for (int i=0;i<name.size();i++)
             to_lower(name[i]);             // LOWERCASE
@@ -367,8 +410,8 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
 
     ///Solve
     string ev_tmp=ev;
-    for (int i=0;i<ev_tmp.size();i++)
-        if (ev_tmp[i]==' ')
+    for (int i=0;i<ev_tmp.size()-1;i++)
+        if (ev_tmp[i]==' '&& ev_tmp[i+1]!=' ')
             mark++;
     mark++;
     stringstream ss2(ev);
@@ -378,30 +421,36 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
     { 
         count++;
         //debug(count);
-        int num=stoi(evi);
-
-        if (num==0)
+        if (evi.size()<3)
+            num=stoi(evi);
+/*         if (num==7)
+            debug(small);
+            debug(round_left); */
+        if (evi=="0")
             success;
-        if (num>=1 && num<=5)
+        if (round_left==0 && small==1)
+            {HP=min(HP*5,max_HP);   small=0;}
+        if (round_left2==0 && frog==1)
+            {level=prev_level;   frog=0;} 
+        if (evi=="1" || evi=="2" || evi=="3" || evi=="4" || evi=="5")
         {
             if (arthur || lancelot) level=min(level+1,10);
-            else
+            else 
                 combat(count,num,HP,level,phoenixdown,max_HP);
-
         }          
-        if (num==6)
+        if (evi=="6")
         {
             if (arthur || lancelot) level=min(level+2,10);
             else 
                 shaman(count,num,HP,level,remedy,max_HP,round_left,small,frog);
         }
-        if (num==7)
+        if (evi=="7")
         {
             if (arthur || lancelot) level=min(10,level+2);
             else
                 siren(count,num,HP,level,maidenkiss,prev_level,round_left2,frog,small);        
         }
-        if (num==11)
+        if (evi=="11")
         {
             int s1;
             auto calculate_s1=[](int level, int phoenixdown)
@@ -415,6 +464,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                 }
             };
             s1=calculate_s1(level,phoenixdown);
+            //debug(s1);
             auto prime = [](int n)
             {
                 if (n<2)    return 0;
@@ -425,32 +475,33 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
             };
             HP=HP+(s1%100);
             //debug(HP);
-            while (!prime(HP++))
+            while (prime(HP+1)==0)
                 HP++;
+            HP++;
+            //debug(HP);
             HP=min(HP,max_HP);
-            //debug(s1);
         }
-        if (num==12)
+        if (evi=="12")
         {
             mush_fibo(HP);       
         }    
-        if (num>100)
+        if (evi.size()>=3)
         {
             string file_name=_file[0];
             //debug(file_name);
             int number_of_event=evi.size()-2;
             //debug(number_of_event);
             
-            mush_ghost(number_of_event,evi,HP,max_HP,phoenixdown,file_name,frog,small);
+            mush_ghost(number_of_event,evi,HP,max_HP,phoenixdown,file_name,frog,small,round_left, round_left2,level,prev_level);
             
         }
-        if (num==15)
+        if (evi=="15")
             remedy=min(remedy+1,99);
-        if (num==16)
+        if (evi=="16")
             maidenkiss=min(maidenkiss+1,99);
-        if (num==17)
+        if (evi=="17")
             phoenixdown=min(phoenixdown+1,99);
-        if (num==19)    //aphelious
+        if (evi=="19")    //aphelious
         {
             if (!has_met_asclepius)
             {
@@ -458,7 +509,7 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                 has_met_asclepius=1;
             }     
         }
-        if (num==18)
+        if (evi=="18")
         {
             if (!has_met_merlin)
             {
@@ -466,42 +517,47 @@ void adventureToKoopa(string file_input, int & HP, int & level, int & remedy, in
                 has_met_merlin=1;
             }
         }
-        if (num==99)
+        if (evi=="99")
         {
-            if (arthur || lancelot)
+            if (lancelot)
             {
                 if (level < 8)
                     fail;
             }             
-            else if (level < 10)
+            else if (!arthur && level < 10)
                     fail;
             level=10;
         }
 
-        /*update shaman*/
-        //debug(small);
-        if (!small && round_left >0)        // USE ITEM
-            {round_left=0;  HP=min(HP*5,max_HP);}
-        if (small)  round_left--;
-        //debug(round_left);
-        if (round_left==0 && small==1)
-            {HP=min(HP*5,max_HP);   small=0;}
-
-        /*update siren*/
-        if (!frog && round_left2>0)    // USE ITEM
-            {round_left2=0; level=prev_level;}
-        if (frog)   round_left2--;
-        if (round_left2==0 && frog==1)
-            {level=prev_level;   frog=0;} 
-        
         /*update*/
-        if (HP<0 && phoenixdown==0) fail;
-        if (HP<0 && phoenixdown>0)  {
-            round_left=0;   HP=max_HP;  phoenixdown--;  small=0;
+        if (HP<=0 && phoenixdown==0) fail;
+        if (HP<=0 && phoenixdown>0)  {
+            use_phoenixdown(HP,max_HP,phoenixdown,frog,small,round_left,round_left2,level,prev_level);
         }
+
+        /*update shaman*/
+
+        if (small && round_left >0 && remedy>0)        // USE ITEM
+            use_remedy(HP,max_HP,remedy,round_left,small);
+        if (small)  round_left=max(round_left-1,0); 
+        if (round_left==0 && small==1)
+        {HP=min(HP*5,max_HP);   small=0;} 
+        //debug(round_left);
+        //debug(small);
+        /*update siren*/
+
+        if (frog && round_left2>0 && maidenkiss>0)    // USE ITEM
+            use_maidenkiss(level,prev_level,maidenkiss,round_left2,frog);
+        if (frog)   round_left2=max(round_left2-1,0);
+        if (round_left2==0 && frog==1)
+            {level=prev_level;   frog=0;}
         if (count==mark)    break;   
         display(HP,level,remedy,maidenkiss,phoenixdown,-1);
-    } 
-    if (HP>=0)  success;
-    if (HP<0)   fail;       
+    }
+    if (round_left==0 && small==1)
+        {HP=min(HP*5,max_HP);   small=0;}
+    if (round_left2==0 && frog==1)
+            {level=prev_level;   frog=0;} 
+    if (HP>0)  success;
+    if (HP<=0)   fail;       
 }
