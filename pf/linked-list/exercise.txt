@@ -1,0 +1,16 @@
+0. Recursively get the size of the linked list                      DONE
+1. Print the middle value of a given list                           DONE
+2. Count the number of times a given int occurs in a list           DONE     
+3. Change a value at an index of a linked list                      DONE
+4. Check if a linked list is circular                               DONE
+5. Sort a linked list
+6. Swap nodes at 2 given index of a linked list
+7. Reverse a linked list                                            DONE
+8. Delete any nodes that have their data equal to a given value     DONE
+9. Get the sum of every nodes in a linked list                      DONE
+10. Count Node on a linked list                                     DONE
+11. Merge 2 linked list                                             DONE
+12. Split a linked list at a given index
+13. Delete a linked list                                            DONE
+14. Shallow copy a linked list
+15. Deep copy a linked list

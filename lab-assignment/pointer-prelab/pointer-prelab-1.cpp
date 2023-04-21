@@ -2,22 +2,15 @@
 
 using namespace std;
 
-void shallowCopy(int*& newArr, int*& arr)
-{
-    for (int i = 0; i < sizeof(arr); ++i)
-    {
-        newArr[i] = arr[i];
-    }
+int* zeros(int n) {
+    if (n <= 0) return nullptr;
+    int* arr = new int[n];
+    for (int i = 0; i < n; ++i) arr[i] = 0;
+    return arr;
 }
 
 int main()
 {
-    int* arr = new int[2];
-    arr[0] = 2; arr[1] = 3;
-    int* newArr = nullptr;
-
-    shallowCopy(newArr, arr);
-    cout << newArr[0] << ' ' << newArr[1];
-    
-    delete[] arr;
+    int* arr = zeros(10);
+    for (int i = 0; i < 10; ++i) cout << arr[i] << ' ';
 }
