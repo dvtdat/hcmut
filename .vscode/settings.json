@@ -5,6 +5,15 @@
         "iosfwd": "cpp",
         "iostream": "cpp",
         "chrono": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "*.tcc": "cpp",
+        "regex": "cpp",
+        "fstream": "cpp",
+        "ostream": "cpp",
+        "numeric": "cpp",
+        "istream": "cpp",
+        "system_error": "cpp",
+        "typeindex": "cpp",
+        "typeinfo": "cpp"
     }
 }

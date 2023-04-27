@@ -14,7 +14,7 @@ public:
 
     Animal() : id(idIdx++) {}
     virtual ~Animal() {}
-    int getID() {return id;}
+    int getID() { return id; }
     virtual void eat() = 0; //pure virtual function
     //void play() {}
     virtual void play() = 0; //switch to the above declaration to see the differences
@@ -37,8 +37,7 @@ public:
     }
 };
 
-//class Ant : public Insect
-class Ant : virtual public Insect
+class Ant : public Insect
 {
 private:
     int power;
@@ -59,11 +58,12 @@ public:
 class Mammal : virtual public Animal
 {
 public:
+    Mammal() {}
+    ~Mammal() {}
     virtual void giveBirth() = 0;
 };
 
-//class Human : public Mammal
-class Human : virtual public Mammal
+class Human : public Mammal
 {
 protected:
     string name;
@@ -75,7 +75,6 @@ public:
 
     ~Human() {} //currently doing nothing
 
-    
     void giveBirth() {} //even though there's nothing, the function must be here for everything to work finely
     void eat()
     {
@@ -96,15 +95,19 @@ public:
     /* btw, getID() get conflicted */
 
     AntMan(const string & strName, int a, int pw) : Human(strName, a), Ant(2, 999) {}
+    ~AntMan() {}
     /* everything must be initialize before doing any thing */
     /* Ant, Human and AntMan is not an Animal, beware that */
+
+    /* id and getID() from Ant and Human are being conflicted, there for it doesn't work*/
+    /* using virtual inheritance, we can resolve this problem*/
     
     void eat()
     {
-        cout << "Antman " << getID() << "[name: " << name << ", age: " << age << "] is eating\n";
+        cout << "Antman " << Human::getID() << "[name: " << Human::name << ", age: " << Human::age << "] is eating\n";
     }
     void play()
     {
-        cout << "Antman " << getID() << "[name: " << name << ", age: " << age << "] is playing\n";
+        cout << "Antman " << Human::getID() << "[name: " << Human::name << ", age: " << Human::age << "] is playing\n";
     }
 };

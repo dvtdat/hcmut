@@ -2,7 +2,10 @@
 
 int main()
 {
-    Animal * pA[] = {new Insect(1000), new Ant(8, 1000), new Human("John", 0), new Antman("Scott", 30, 999)};
+    Animal* pA[] = {new Insect(1000), 
+                    new Ant(8, 1000), 
+                    new Human("John", 0), 
+                    new Antman("Scott", 30, 999)};
 
     for (int i = 0; i < 4; ++i)
     {
