@@ -92,6 +92,7 @@ void removeLastNode(Node* &head)
     if (head->next == nullptr)
     {
         delete head;
+        head = nullptr;
         return;
     }
 
@@ -226,6 +227,7 @@ Node* mergeListShallow(Node* &head1, Node* &head2)
 
 void printList(Node* head)
 {
+    if (head == nullptr) return;
     for(Node* p = head; p; p = p->next)
     {
         cout << p->data << ' ';
