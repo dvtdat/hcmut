@@ -192,14 +192,14 @@ public:
 
     int getHP() { return HP; }
     int getMaxHP() { return maxHP; }
-    int getGil() { return gil; }
     int getLevel() { return level; }
+    int getGil() { return gil; }
+    BaseBag* getBag() { return (bag != nullptr ? bag : nullptr); }
+    KnightType getType() { return knightType; }
+
     void changeHP(int newHP) { HP = min(newHP, maxHP); }
     void changeGil(int gilOptain) { gil = gilOptain; }
     void changeLevel(int newLevel) { level = min(MAXLEVEL, newLevel); }
-
-    BaseBag* getBag() { return (bag != nullptr ? bag : nullptr); }
-    KnightType getType() { return knightType; }
 
     virtual bool fight(BaseOpponent* opponent, int idx) = 0;
     string toString() const;
@@ -253,7 +253,7 @@ private:
     bool meetHades = false;
 public:
     ArmyKnights(const string &file_armyknights);
-    ~ArmyKnights() {}
+    ~ArmyKnights();
     bool fight(BaseOpponent* opponent, int idx);
     bool adventure(Events* events);
     int count() const;
@@ -286,7 +286,7 @@ protected:
 public:
     BaseItem* next;
     BaseItem(ItemType type, BaseItem* next) : type(type), next(next) {}
-    virtual ~BaseItem() {}
+    virtual ~BaseItem();
 
     ItemType getType() { return type; }
 
@@ -388,11 +388,11 @@ public:
 class Events
 {
 private:
-    int* nEvent;
+    int nEvent;
     int* event;
 public:
     Events(const string & file_events);
-    ~Events() {}
+    ~Events();
 
     int count() const;
     int get(int i) const;
@@ -405,7 +405,7 @@ private:
     Events* events;
 public:
     KnightAdventure();
-    ~KnightAdventure() {}
+    ~KnightAdventure();
 
     void loadArmyKnights(const string &);
     void loadEvents(const string &);

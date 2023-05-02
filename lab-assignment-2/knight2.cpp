@@ -26,6 +26,12 @@ bool is888(int maxHP)
 
 /* * * BEGIN implementation of class BaseItem * * */
 
+BaseItem::~BaseItem()
+{
+    delete knight;
+    delete next;
+}
+
 int getBagSize(BaseItem* head)
 {
     if (head->next == nullptr) return 1;
@@ -172,7 +178,6 @@ end:
 /* * * END implementation of class BaseBag * * */
 
 /* * * BEGIN implementation of class BaseKnight * * */
-
 BaseKnight* BaseKnight::create(int id, int maxHP, int level, int gil, int antidote, int phoenixdownI)
 {
     if (isPrime(maxHP))
@@ -199,108 +204,9 @@ string BaseKnight::toString() const
     return s;
 }
 
-void BaseKnight::print()
+bool PaladinKnight::fight(BaseOpponent* opponent, int idx)
 {
-    cout << maxHP << ' ' << level << ' ' << gil << ' ' << knightType << '\n';
-    cout << bag->toString();
-    cout << '\n';
-}
-
-bool PaladinKnight::fight(BaseOpponent* opponent, int idx)      //defeat all from 1 to 5, not lose gil to QoC, trade with Nina for free
-{
-    int code = opponent->getCode();
     
-    if (CODEMADBEAR <= code && code <= CODETROLL)
-    {
-        if (level > (idx + code) % 10 + 1)
-        {
-            changeGil(gil + opponent->getGilOptain());
-            return true;
-        }
-        else if (level < (idx + code) % 10 + 1)
-        {
-            changeHP(HP - opponent->getBaseDamage() * ((idx + code) % 10 + 1 - level));
-            return false;
-        }
-    }
-
-    if (code == CODETORNBERY)
-    {
-        if (level > (idx + code) % 10 + 1) 
-        {
-            changeLevel(level + 1);
-            return true;
-        }
-        else if (level < (idx + code) % 10 + 1)
-        {
-            for (BaseItem* ptr = getBag()->headItem; ptr; ptr = ptr->next)
-            {
-                if (ptr->getType() == ANTIDOTE)
-                {
-                    this->getBag()->get(ANTIDOTE);
-                    return true;
-                }
-            }
-
-            this->getBag()->dropLastItem();
-            this->getBag()->dropLastItem();
-            this->getBag()->dropLastItem();
-            changeHP(HP - 10);
-            return false;
-        }
-    }
-
-    if (code == CODEQUEEN)
-    {
-        if (level > (idx + code) % 10 + 1)
-        {
-            changeGil(gil * 2);
-            return true;
-        }
-        else if (level < (idx + code) % 10 + 1)
-        {
-            changeGil(gil / 2);
-            return false;
-        }
-    }
-
-    if (code == CODENINA)
-    {
-        if (getGil() >= 50 && getHP() < getMaxHP() / 3)
-        {
-            changeGil(getGil() - 50);
-            changeHP(getHP() + getMaxHP() / 5);
-            return true;
-        }
-        return false;
-    }
-
-    if (code == CODEDURIAN)
-    {
-        changeHP(getMaxHP());
-        return true;
-    }
-
-    if (code == CODEOMEGA)
-    {
-        if ((getLevel() == 10 && getHP() == getMaxHP()) || getType() == DRAGON)
-        {
-            changeLevel(MAXLEVEL);
-            changeGil(MAXGIL);
-            return true;
-        }
-        else
-        {
-            changeHP(0);
-            return false;
-        }
-    }
-
-    if (code == CODEHADES)
-    {
-        if ((getType() == NORMAL && getLevel() == 10) || (getType() == PALADIN)) return true;
-        return false;
-    }
 }
 
 bool LancelotKnight::fight(BaseOpponent* opponent, int idx)
@@ -335,63 +241,25 @@ ArmyKnights::ArmyKnights(const string & file_armyknights)
         knights[i - 1] = BaseKnight::create(i, maxHP, level, gil, antidote, phoenixDownI);
     }
 
+    printInfo();
     input.close();
+}
+
+ArmyKnights::~ArmyKnights()
+{
+    for (int i = 0; i < nKnight; ++i) delete knights[i];
+    delete knights;
+    knights = nullptr;
 }
 
 bool ArmyKnights::fight(BaseOpponent* opponent, int idx)
 {
-    return knights[count() - 1]->fight(opponent, idx);
+    // TODO
 }
 
 bool ArmyKnights::adventure(Events* events)
 {
-    for (int i = 0; i < events->count(); ++i)
-    {
-        int code = events->get(i);
-        if (code == 1)          while (count() > 0 && !fight(new MadBear, i))         killLastKnight();
-        if (code == 2)          while (count() > 0 && !fight(new Bandit, i))          killLastKnight();
-        if (code == 3)          while (count() > 0 && !fight(new LordLupin, i))       killLastKnight();
-        if (code == 4)          while (count() > 0 && !fight(new Elf, i))             killLastKnight();
-        if (code == 5)          while (count() > 0 && !fight(new Troll, i))           killLastKnight();
-        if (code == 6)          while (count() > 0 && !fight(new Tornbery, i))        killLastKnight();
-        if (code == 7)          while (count() > 0 && !fight(new QueenOfCards, i))    killLastKnight();
-        if (code == 8)          while (count() > 0 && !fight(new NinaDeRings, i))     killLastKnight();
-        if (code == 9)          fight(new DurianGarden, i);
-        if (code == 10)
-        {
-            if (hasMetOmega()) continue;
-            while (count() > 0 && !fight(new OmegaWeapon, i)) killLastKnight();
-            if (count() > 0) setOmega();
-        }
-        if (code == 11)
-        {
-            if (hasMetHades()) continue;
-            while (count() > 0 && !fight(new Hades, i)) killLastKnight();
-            if (count() > 0)
-            {
-                setTreasure(PALADINSHIELD);
-                setHades();
-            }
-        }
-        if (code > 110 && code % 110 == 2);      
-        if (code > 110 && code % 110 == 3);
-        if (code > 110 && code % 110 == 4);
-
-        if (code == 95)                         setTreasure(PALADINSHIELD);
-        if (code == 96)                         setTreasure(LANCELOTSPEAR);
-        if (code == 97)                         setTreasure(GUINEVEREHAIR);
-        if (code == 98 && hasThreeTreasure())   setTreasure(EXCALIBURSWORD);
-        
-        if (knights[count() - 1]->getGil() > MAXGIL)
-        {
-            setExcessGil(knights[count() - 1]->getGil() - MAXGIL);
-            knights[count() - 1]->changeGil(MAXGIL);
-            distrubuteGil();
-        }
-        printInfo();
-    }
-
-    // return (if Ultimecia die)
+    // TODO
 }
 
 int ArmyKnights::count() const
@@ -408,20 +276,12 @@ BaseKnight* ArmyKnights::lastKnight() const
 
 void ArmyKnights::killLastKnight()
 {
-    BaseKnight* tmp = lastKnight();
-    delete tmp;
-    tmp = nullptr;
+    // TODO
 }
 
 void ArmyKnights::distrubuteGil()
 {
-    for (int i = count() - 2; i >= 0; --i)
-    {
-        if (excessGil <= 0) return;
-        int tmp = knights[i]->getGil() + excessGil - 999;
-        knights[i]->changeGil(min(knights[i]->getGil() + excessGil, 999));
-        excessGil = tmp;
-    }
+    // TODO
 }
 
 bool ArmyKnights::hasMetOmega() const
@@ -482,35 +342,34 @@ void ArmyKnights::printResult(bool win) const
 /* * * END implementation of class ArmyKnights * * */
 
 /* * * BEGIN implementation of class Events * * */
-
 Events::Events(const string & file_events)
 {
     ifstream input;
     input.open(file_events);
     
-    nEvent = new int;
-    input >> *nEvent;
+    input >> nEvent;
 
-    event = new int[*nEvent];
+    event = new int[nEvent];
 
-    for (int i = 0; i < *nEvent; ++i)
-    {
-        int value; input >> value;
-        event[i] = value;
-    }
+    for (int i = 0; i < nEvent; ++i) input >> event[i];
+        
     input.close();
+}
+
+Events::~Events()
+{
+    delete event;
 }
 
 int Events::count() const
 {
-    return *nEvent;
+    return nEvent;
 }
 
 int Events::get(int i) const
 {
     return event[i];
 }
-
 /* * * END implementation of class Events * * */
 
 
@@ -519,6 +378,12 @@ KnightAdventure::KnightAdventure()
 {
     armyKnights = nullptr;
     events = nullptr;
+}
+
+KnightAdventure::~KnightAdventure()
+{
+    delete armyKnights;
+    delete events;
 }
 
 void KnightAdventure::loadArmyKnights(const string & tmpFile)
@@ -533,6 +398,6 @@ void KnightAdventure::loadEvents(const string & tmpFile)
 
 void KnightAdventure::run()
 {
-    armyKnights->adventure(events);
+    cout << "haha";
 }
 /* * * END implementation of class KnightAdventure * * */
