@@ -1,10 +1,10 @@
-#include "knight2.h"
+#include "knight2DAP.h"
 
 int main(int argc, char ** argv) {
     string file_armyknights, file_events;
     if (argc == 1) {
-        file_armyknights = "tc1_armyknights"; // hard-code
-        file_events = "tc1_events";
+        file_armyknights = "army.inp";
+        file_events = "event.inp";
     }
     else if (argc == 3) {
         file_armyknights = argv[1];
@@ -16,7 +16,7 @@ int main(int argc, char ** argv) {
     }
     
     // BEGIN
-    freopen("output.out", "w", stdout);
+    freopen("output.ans", "w", stdout);
     KnightAdventure * knightAdventure = new KnightAdventure();
     knightAdventure->loadArmyKnights(file_armyknights);
     knightAdventure->loadEvents(file_events);

@@ -55,6 +55,45 @@ MyMatrix::MyMatrix(MyMatrix &&M) : pD(M.pD), nR(M.nR), nC(M.nC)
     M.nR = M.nC = 0;
 }
 
+MyMatrix MyMatrix::operator*(const MyMatrix & B)
+{
+    if (nC != B.nR)
+    {
+        throw std::invalid_argument("Matrix dimensions do not match");
+    }
+
+    MyMatrix res(nR, B.nC);
+    for (int i = 0; i < nR; ++i)
+    {
+        for (int j = 0; j < B.nC; ++j)
+        {
+            float sum = 0.0;
+            for (int k = 0; k < nC; ++k)
+            {
+                sum += pD[i][k] * B.pD[k][j];
+            }
+            res.pD[i][j] = sum;
+        }
+    }
+
+    return res;
+}
+
+
+MyMatrix MyMatrix::operator*(float s)
+{
+    MyMatrix res(nR, nC);
+    for (int i = 0; i < nR; ++i)
+    {
+        for (int j = 0; j < nC; ++j)
+        {
+            res.at(i, j) = pD[i][j] * s;
+        }
+    }
+
+    return res;
+}
+
 MyMatrix &MyMatrix::operator=(const MyMatrix &M)
 {
     clear();
@@ -93,38 +132,4 @@ ostream & operator<<(ostream & os, const MyMatrix & m)
         os << '\n';
     }
     return os;
-}
-
-MyMatrix MyMatrix::operator*(const MyMatrix & B)
-{
-
-}
-
-MyMatrix MyMatrix::operator*(float s)
-{
-
-}
-
-int main(int narg, char** argv)
-{
-    int nR, nC;
-
-    stringstream ss("2 3");
-    ss >> nR >> nC;
-
-    MyMatrix mat(nR, nC);
-
-    for (int i = 0; i < mat.getNRows(); ++i)
-    {
-        for (int j = 0; j < mat.getNCols(); ++i)
-        {
-            mat.at(i, j) = (rand() % 101) * 0.01f;
-        }
-    }
-
-    cout << mat << '\n';
-    MyMatrix B = (mat * 2.0f), C(mat);
-    mat = std::move(B);
-
-    cout << B << '\n';
 }

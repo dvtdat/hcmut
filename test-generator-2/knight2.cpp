@@ -117,19 +117,14 @@ void BaseBag::swapItem(BaseItem* item)
 BaseItem* BaseBag::get(ItemType type)
 {
     if (headItem == nullptr) return nullptr;
-    if (headItem->getType() == type)
-    {
-        BaseItem* tmp = headItem;
-        return tmp;
-    }
-
+    
     BaseItem* pre = headItem;
-    while (pre->next && pre->next->getType() != type)
+    while (pre != nullptr)
     {
-        if (pre->next->getType() == type) return pre->next;
+        if (pre->getType() == type) return pre;
         pre = pre->next;
     }
-    if (pre->getType() == type && pre->next == nullptr) return pre;
+
     return nullptr;
 }
 
@@ -137,22 +132,14 @@ BaseItem* BaseBag::getPhoenixDown(BaseKnight* knight)
 {
     if (headItem == nullptr) return nullptr;
     ItemType type[4] = {PHOENIXI, PHOENIXII, PHOENIXIII, PHOENIXIV};
-    for (int i = 0; i < 4; ++i)
-    {
-        if (headItem->getType() == type[i] && headItem->canUse(knight))
-        {
-            BaseItem* tmp = headItem;
-            return tmp;
-        }
-    }
-    
+
     BaseItem* pre = headItem;
-    while (pre->next)
+    while (pre != nullptr)
     {
-        for (int i = 0; i < 4; ++i) if (pre->next->getType() == type[i] && pre->next->canUse(knight)) return pre->next;
+        for (int i = 0; i < 4; ++i) if (pre->getType() == type[i] && pre->canUse(knight)) return pre;
         pre = pre->next;
     }
-    for (int i = 0; i < 4; ++i) if (pre->getType() == type[i] && pre->canUse(knight) && pre->next == nullptr) return pre;
+
     return nullptr;
 }
 
@@ -218,14 +205,6 @@ bool PaladinKnight::fight(BaseOpponent* opponent, int idx)
     if (code == 6)
     {
         if (level >= (idx + code) % 10 + 1) return true;
-        if (getBag()->get(ANTIDOTE) != nullptr)
-        {
-            getBag()->swapItem(getBag()->get(ANTIDOTE));
-            getBag()->dropFirst();
-            return false;
-        }
-        getBag()->dropFirst(); getBag()->dropFirst(); getBag()->dropFirst();
-        changeHP(HP - 10);
         return false;
     }
     if (code == 7)
@@ -274,14 +253,6 @@ bool LancelotKnight::fight(BaseOpponent* opponent, int idx)
     if (code == 6)
     {
         if (level >= (idx + code) % 10 + 1) return true;
-        if (getBag()->get(ANTIDOTE) != nullptr)
-        {
-            getBag()->swapItem(getBag()->get(ANTIDOTE));
-            getBag()->dropFirst();
-            return false;
-        }
-        getBag()->dropFirst(); getBag()->dropFirst(); getBag()->dropFirst();
-        changeHP(HP - 10);
         return false;
     }
 
@@ -397,14 +368,6 @@ bool NormalKnight::fight(BaseOpponent* opponent, int idx)
     if (code == 6)
     {
         if (level >= (idx + code) % 10 + 1) return true;
-        if (getBag()->get(ANTIDOTE) != nullptr)
-        {
-            getBag()->swapItem(getBag()->get(ANTIDOTE));
-            getBag()->dropFirst();
-            return false;
-        }
-        getBag()->dropFirst(); getBag()->dropFirst(); getBag()->dropFirst();
-        changeHP(HP - 10);
         return false;
     }
 
@@ -486,7 +449,7 @@ bool ArmyKnights::fight(BaseOpponent* opponent, int idx)
     {
         int opponentHP = 5000;
         if (hasExcaliburSword()) return true;
-        if (!hasThreeTreasure()) return false;
+        if (!hasThreeTreasure()) goto end;
 
         for (int i = nCurKnight - 1; i >= 0; --i)
         {
@@ -507,6 +470,8 @@ bool ArmyKnights::fight(BaseOpponent* opponent, int idx)
                 knights[i] = nullptr;
             }
         }
+    
+    end:
         for (int i = 0; i < nKnight; ++i)
         {
             if (knights[i] == nullptr) continue;
@@ -521,8 +486,23 @@ bool ArmyKnights::fight(BaseOpponent* opponent, int idx)
     if (code == CODEHADES && hasMetHades()) return true;
     if (code == CODEOMEGA && hasMetOmega()) return true;
 
+
     if (lKnight->fight(opponent, idx) == false)
     {
+        if (code == CODETORNBERY && lKnight->getType() != DRAGON)
+        {
+            if (lKnight->getBag()->get(ANTIDOTE) != nullptr)
+            {
+                lKnight->getBag()->swapItem(lKnight->getBag()->get(ANTIDOTE));
+                lKnight->getBag()->dropFirst();
+                return true;
+            }
+            lKnight->getBag()->dropFirst(); 
+            lKnight->getBag()->dropFirst(); 
+            lKnight->getBag()->dropFirst();
+            lKnight->changeHP(lKnight->getHP() - 10);
+        }
+
         if (lKnight->getHP() <= 0)
         {
             BaseItem* tmp = lKnight->getBag()->getPhoenixDown(lKnight);
@@ -531,18 +511,17 @@ bool ArmyKnights::fight(BaseOpponent* opponent, int idx)
                 tmp->use(lKnight);
                 lKnight->getBag()->swapItem(tmp);
                 lKnight->getBag()->dropFirst();
-                return true;
+                if (lKnight->getHP() > 0) return true;
             }
 
             if (lKnight->getGil() >= 100)
             {
                 lKnight->changeHP(lKnight->getMaxHP() / 2);
                 lKnight->changeGil(lKnight->getGil() - 100);
-                return true;
+                if (lKnight->getHP() > 0) return true;
             }
 
             excessGil = lKnight->getGil();
-            distrubuteGil();
             killLastKnight();
             if (count() > 0) return true;
             else return false;
@@ -583,11 +562,8 @@ bool ArmyKnights::adventure(Events* events)
     bool defeatUltimecia = false;
     for (int i = 0; i < events->count(); ++i)
     {
-        if (count() <= 0)
-        {
-            printInfo();
-            continue;
-        }
+        if (count() <= 0) break;
+
         int code = events->get(i);
         if (code == 1) fight(new MadBear, i);
         if (code == 2) fight(new Bandit, i);

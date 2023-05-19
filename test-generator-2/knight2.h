@@ -7,9 +7,9 @@
 
 const int INF = 2e9;
 const int MAXN = 1010;
-const int BAGNORMAL = 16;
+const int BAGNORMAL = 19;
 const int BAGDRAGON = 14;
-const int BAGLANCELOT = 19;
+const int BAGLANCELOT = 16;
 const int BAGPALADIN = INF;
 
 const int DAMAGEMADBEAR = 10,   GILMADBEAR = 100,   CODEMADBEAR = 1;
@@ -27,7 +27,7 @@ const int CODEULTIMECIA = 99;
 
 const int PALADINSHIELD = 0, LANCELOTSPEAR = 1, GUINEVEREHAIR = 2, EXCALIBURSWORD = 3;
 const int CODEPALADINSHIELD = 95, CODELANCELOTSPEAR = 96, CODEGUINEVEREHAIR = 97, CODEEXCALIBURSWORD = 98;
-const int MAXGIL = 999, MAXLEVEL = 10;
+const int MAXGIL = 999, MAXLEVEL = 10, MINHP = 0;
 
 class BaseItem;
 class BaseKnight;
@@ -239,7 +239,7 @@ class DragonKnight : virtual public BaseKnight
 {
 public:
     DragonKnight(int id, int maxHP, int level, int gil, int antidote, int phoenixdownI) :
-        BaseKnight(id, maxHP, level, gil, antidote, phoenixdownI, DRAGON) {}
+        BaseKnight(id, maxHP, level, gil, 0, phoenixdownI, DRAGON) {}
     ~DragonKnight() {}
     bool fight(BaseOpponent* opponent, int idx);
 };
@@ -266,7 +266,7 @@ private:
 public:
     ArmyKnights(const string &file_armyknights);
     ~ArmyKnights();
-    bool fight(BaseOpponent* opponent, int idx);
+    bool fight(BaseOpponent* opponent, int idx);            // NEED TO FIX
     bool adventure(Events* events);
     int count() const;
     BaseKnight* lastKnight() const;

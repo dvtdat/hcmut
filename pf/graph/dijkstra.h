@@ -11,7 +11,7 @@ using namespace std;
 typedef pair<int, int> ii;
 
 const int maxN = 1000;
-const int inf = 1e9;
+const int inf = 2e9;
 
 vector<ii> adj[maxN];
 

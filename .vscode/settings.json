@@ -67,6 +67,7 @@
         "type_traits": "cpp",
         "initializer_list": "cpp",
         "stdexcept": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "stack": "cpp"
     }
 }

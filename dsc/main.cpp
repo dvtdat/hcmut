@@ -2,7 +2,7 @@
 
 int main()
 {
-    string s = "2+4/5+((1+2)*(3*(4^5))+7^9)";
-    cout << Infix2Postfix(s) << '\n';
-    cout << Infix2Prefix(s);
+    // freopen("input.inp", "r", stdin);
+
+    cout << LogicPostfixPrefixCalculator("t~tw~&zpwpp|q&&y|z&z&&xp~z|&y~&<->&|->", "t w z p q y x 1 1 1 1 1 1 1");
 }
