@@ -2,7 +2,15 @@
 
 int main()
 {
-    // freopen("input.inp", "r", stdin);
+    string s1 = "1+10";
+    string s2 = "a&b";
+    string s3 = "a b 0 1";
 
-    cout << LogicPostfixPrefixCalculator("t~tw~&zpwpp|q&&y|z&z&&xp~z|&y~&<->&|->", "t w z p q y x 1 1 1 1 1 1 1");
+    cout << Infix2Postfix(s1) << '\n';
+    cout << Infix2Prefix(s1) << '\n';
+    cout << PostfixPrefixCalculator(Infix2Postfix(s1)) << '\n';
+
+    cout << LogicInfix2Postfix(s2) << '\n';
+    cout << LogicInfix2Prefix(s2) << '\n';
+    cout << LogicPostfixPrefixCalculator(s2, s3) << '\n'; 
 }

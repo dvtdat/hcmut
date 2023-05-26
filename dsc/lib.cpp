@@ -6,11 +6,12 @@ template <typename T> T mul(const T & a, const T & b) { return a * b; }
 template <typename T> T div(const T & a, const T & b) { return a / b; }
 template <typename T> T exp(const T & a, const T & b) { return pow(a, b); }
 
+template <typename T> T non(const T & a, const T & b) { return true; }
 template <typename T> T con(const T & a, const T & b) { return a & b; }
 template <typename T> T dis(const T & a, const T & b) { return a | b; }
 template <typename T> T imp(const T & a, const T & b) { return !a | b; }
 template <typename T> T neg(const T & a, const T & b) { return !a; }
-template <typename T> T eql(const T & a, const T & b) { return a ^ b; }
+template <typename T> T eql(const T & a, const T & b) { return !(a ^ b); }
 
 string rounding(double val)
 {
@@ -66,11 +67,11 @@ myLogOp getLogOpFunc(string s)
     if (s == "->") return imp<bool>;
     if (s == "~") return neg<bool>;
     if (s == "<->") return eql<bool>;
-    return nullptr;
+    return non<bool>;
 }
 
 int priority[200];
-string in[300];
+string in[1000];
 
 string Infix2Postfix(string s)
 {
@@ -417,33 +418,36 @@ string LogicPostfixPrefixCalculator(string s, string var)
             }
             in[cnt++] = s[i]; 
         }
+        else if (tmp == "->" || tmp == "<->")
+        {
+            in[cnt++] = tmp; tmp = s[i];
+        }
         else tmp += s[i];
     }
     if (tmp != "") in[cnt++] = tmp;
 
-    bool val[200];
+    bool val[210];
+    for (int i = 0; i < 200; ++i) val[i] = false;
+
     for (int i = 0; i < (int)var.length() / 2; ++i)
     {
         if (var[i] == ' ') continue;
         val[var[i] - 'a'] = var[i + var.length() / 2 + 1] - '0';
     }
 
-    if (isLogOp(in[0])) goto prefix;
-    else goto postfix; 
-
-prefix:
-{
-    stack<bool> valStack;
-    reverse(in, in + cnt);
-
-    for (int i = 0; i < cnt; ++i)
+    if (isLogOp(in[0]))
     {
-        if (!isLogOp(in[i])) 
+        stack<bool> valStack;
+        reverse(in, in + cnt);
+
+        for (int i = 0; i < cnt; ++i)
         {
-            valStack.push(val[in[i][0] - 'a']);
-        }
-        else
-        {
+            if (!isLogOp(in[i]))
+            {
+                valStack.push(val[in[i][0] - 'a']);
+                continue;
+            }
+            
             if (in[i] == "~" && !valStack.empty())
             {
                 bool a = valStack.top();
@@ -460,26 +464,20 @@ prefix:
                 valStack.pop();
                 valStack.push(getLogOpFunc(in[i])(a, b));
             }
+            
         }
+        
+        if (valStack.empty()) return "FALSE";
+        return (valStack.top() ? "TRUE" : "FALSE");
     }
-    
-    return (valStack.top() ? "TRUE" : "FALSE");
-}
-postfix:
-{
+
     stack<bool> valStack;
     stack<string> opStack;
 
     for (int i = 0; i < cnt; ++i)
     {
-        if (isLogOp(in[i]))
-        {
-            opStack.push(in[i]);
-        }
-        else
-        {
-            valStack.push(val[in[i][0] - 'a']);
-        }
+        if (isLogOp(in[i])) opStack.push(in[i]);
+        else valStack.push(val[in[i][0] - 'a']);
 
         if (opStack.size())
         {
@@ -491,7 +489,8 @@ postfix:
                 opStack.pop();
                 continue;
             }
-            if (valStack.size() >= 2)
+            
+            if (valStack.size() >= 2 && !opStack.empty())
             {
                 bool a = valStack.top();
                 valStack.pop();    
@@ -503,6 +502,6 @@ postfix:
         }
     }
 
+    if (valStack.empty()) return "FALSE";
     return (valStack.top() ? "TRUE" : "FALSE");
 }    
-}

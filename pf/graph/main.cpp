@@ -1,7 +1,8 @@
-#include "dijkstra.h"
+#include "lib.cpp"
 
 int main()
 {
+    freopen("input.inp", "r", stdin);
     int distance[maxN];
 
     int n, m; cin >> n >> m;
@@ -12,11 +13,7 @@ int main()
         adj[u].push_back(ii(v, w));
         adj[v].push_back(ii(u, w));
     }
-
-    dijkstra(adj, 0, distance);
-
-    for (int i = 0; i < n; ++i)
-    {
-        cout << distance[i] << '\n';
-    }
+   
+    dijkstra(adj, 1, distance);
+    print(distance);
 }
