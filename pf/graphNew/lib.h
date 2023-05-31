@@ -23,7 +23,8 @@ public:
     MyGraph(): V(0), E(0) {}
     MyGraph(int V): V(V) {}
     ~MyGraph() {}
-    void addEdge(int u, int v, int w);
+    void addUndirectedEdge(int u, int v, int w);
+    void addDirectedEdge(int u, int v, int w);
     int getVertices();
     int getEdges();
 

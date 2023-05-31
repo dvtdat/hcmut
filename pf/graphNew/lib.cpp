@@ -1,9 +1,17 @@
 #include "lib.h"
 
-void MyGraph::addEdge(int u, int v, int w)
+void MyGraph::addUndirectedEdge(int u, int v, int w)
 {
     adj[u].push_back(ii(v, w));
     adj[v].push_back(ii(u, w));
+    E++; E++;
+    if (u >= V) V = u + 1;
+    if (v >= V) V = v + 1;
+}
+
+void MyGraph::addDirectedEdge(int u, int v, int w)
+{
+    adj[u].push_back(ii(v, w));
     E++;
     if (u >= V) V = u + 1;
     if (v >= V) V = v + 1;
@@ -58,9 +66,9 @@ int* MyGraph::bellmanFord(int start)
     for (int i = 0; i < V; ++i) dist[i] = inf;
     dist[start] = 0;
 
-    for (int k = 0; k < maxN - 1; ++k)
+    for (int k = 0; k < V - 1; ++k)
     {
-        for (int u = 0; u < maxN; ++u)
+        for (int u = 0; u < V; ++u)
         {
             for (int i = 0; i < (int)adj[u].size(); ++i)
             {
@@ -73,9 +81,15 @@ int* MyGraph::bellmanFord(int start)
                 }
             }
         }
+
+        for (int i = 1; i < V; ++i)
+        {
+            cout << dist[i] << ' ';
+        }   
+        cout << '\n';
     }
 
-    for (int u = 0; u < maxN; ++u)
+    for (int u = 0; u < V; ++u)
     {
         for (int i = 0; i < (int)adj[u].size(); ++i)
         {
