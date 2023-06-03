@@ -132,10 +132,7 @@ public:
     int getNRows() { return nR; }
     int getNCols() { return nC; }
     float * operator[](int row) const { return pD[row]; }
-    float & at(int r, int c)
-    {
-        return pD[r][c];
-    }
+    float & at(int r, int c) { return pD[r][c]; }
     const float & getAt(int r, int c) const { return pD[r][c]; }
     MyMatrix operator*(const MyMatrix & B);
     MyMatrix operator*(float s);
