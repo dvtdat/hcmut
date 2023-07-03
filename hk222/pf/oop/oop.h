@@ -16,7 +16,7 @@ public:
     virtual ~Animal() {}
     int getID() { return id; }
     virtual void eat() = 0; //pure virtual function
-    //void play() {}
+    // void play() {}
     virtual void play() = 0; //switch to the above declaration to see the differences
 };
 
@@ -42,7 +42,7 @@ class Ant : public Insect
 private:
     int power;
 public:
-    Ant(int nL = 6, int pw = 1000) :  Insect(nL), power(pw) {}
+    Ant(int nL = 6, int pw = 1000) :  Insect(nL), power(pw) { cout << "Create Ant...\n"; }
     ~Ant() {}
 
     void eat()
@@ -55,7 +55,7 @@ public:
     }
 };
 
-class Mammal : virtual public Animal
+class Mammal : public Animal
 {
 public:
     Mammal() {}
@@ -69,13 +69,13 @@ protected:
     string name;
     int age;
 public:
-    Human(const string & strName = "NoOne", int a = 0) : name(strName), age(a) {} 
-    //before entering the curly bracket of the constructor, everything must be created
-    //every attribute of the parent class must be defined before entering the curly bracket of the child's constructor
+    Human(const string & strName = "NoOne", int a = 0) : name(strName), age(a) { cout << "Create Human...\n"; } 
+    // before entering the curly bracket of the constructor, everything must be created
+    // every attribute of the parent class must be defined before entering the curly bracket of the child's constructor
 
-    ~Human() {} //currently doing nothing
+    ~Human() {} // currently doing nothing
 
-    void giveBirth() {} //even though there's nothing, the function must be here for everything to work finely
+    void giveBirth() {} // even though there's nothing, the function must be here for everything to work finely
     void eat()
     {
         cout << "Human " << getID() << "[name: " << name << ", age: " << age << "] is eating\n";
@@ -87,7 +87,7 @@ public:
 };
 
 
-class AntMan : public Ant, public Human //order of declaration is important, try changing the order to see the differences
+class AntMan : public Ant, public Human // order of declaration is important, try changing the order to see the differences
 {
 public:
     /* void eat() { cout << "Human " << getID() << "[name: " << name << ", age: " << age << "] is eating\n"; }*/
@@ -99,15 +99,15 @@ public:
     /* everything must be initialize before doing any thing */
     /* Ant, Human and AntMan is not an Animal, beware that */
 
-    /* id and getID() from Ant and Human are being conflicted, there for it doesn't work*/
+    /* id and getID() from Ant and Human are being conflicted, therefore it doesn't work*/
     /* using virtual inheritance, we can resolve this problem*/
     
     void eat()
     {
-        cout << "Antman " << Human::getID() << "[name: " << Human::name << ", age: " << Human::age << "] is eating\n";
+        cout << "Antman " << Human::getID() << "[name: " << name << ", age: " << age << "] is eating\n";
     }
     void play()
     {
-        cout << "Antman " << Human::getID() << "[name: " << Human::name << ", age: " << Human::age << "] is playing\n";
+        cout << "Antman " << Ant::getID() << "[name: " << name << ", age: " << age << "] is playing\n";
     }
 };
