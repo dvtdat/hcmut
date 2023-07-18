@@ -12,13 +12,13 @@ private:
 
     void clearhelp(BSTNode<Key, T>*);
     BSTNode<Key, T>* inserthelp(BSTNode<Key, T>*, const Key&, const T&);
-    BSTNode<Key,E>* deletemin(BSTNode<Key, T>*);
-    BSTNode<Key,E>* getmin(BSTNode<Key, T>*);
-    BSTNode<Key,E>* removehelp(BSTNode<Key, T>*, const Key&);
+    BSTNode<Key, T>* deletemin(BSTNode<Key, T>*);
+    BSTNode<Key, T>* getmin(BSTNode<Key, T>*);
+    BSTNode<Key, T>* removehelp(BSTNode<Key, T>*, const Key&);
     T findhelp(BSTNode<Key, T>*, const Key&) const;
     void printhelp(BSTNode<Key, T>*, int) const;
 public:
-    BST() { root = nullptr; nodeCnt = 0 }
+    BST() { root = nullptr; nodeCnt = 0; }
     ~BST() { clearhelp(root); }
 
     void clear() {
@@ -32,7 +32,7 @@ public:
 
     T remove(const Key& k) {
         T tmp = findhelp(root, k);
-        if (tmp != nullptr) {
+        if (tmp != T()) {
             root = removehelp(root, k);
             nodeCnt--;
         }

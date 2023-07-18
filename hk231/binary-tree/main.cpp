@@ -1,29 +1,41 @@
 #include <iostream>
-#include "BSTNode.h"
-#include "BinaryNode.cpp"
+#include "BST.cpp"
 
 int main() {
-    // Create the nodes
-    BSTNode<int, std::string>* node1 = new BSTNode<int, std::string>(5, "Node 5");
-    BSTNode<int, std::string>* node2 = new BSTNode<int, std::string>(3, "Node 3");
-    BSTNode<int, std::string>* node3 = new BSTNode<int, std::string>(7, "Node 7");
-    BSTNode<int, std::string>* node4 = new BSTNode<int, std::string>(2, "Node 2");
-    BSTNode<int, std::string>* node5 = new BSTNode<int, std::string>(4, "Node 4");
-    BSTNode<int, std::string>* node6 = new BSTNode<int, std::string>(6, "Node 6");
-    BSTNode<int, std::string>* node7 = new BSTNode<int, std::string>(8, "Node 8");
+    BST<int, std::string> myTree;
 
-    // Set the children
-    node1->setLeft(node2);
-    node1->setRight(node3);
-    node2->setLeft(node4);
-    node2->setRight(node5);
-    node3->setLeft(node6);
-    node3->setRight(node7);
+    // Inserting dummy data
+    myTree.insert(5, "Apple");
+    myTree.insert(3, "Banana");
+    myTree.insert(7, "Orange");
+    myTree.insert(2, "Grape");
+    myTree.insert(4, "Mango");
+    myTree.insert(6, "Pineapple");
+    myTree.insert(8, "Strawberry");
 
+    // Printing the BST
+    myTree.print();
 
+    // Searching for a node
+    int searchKey = 4;
+    std::string searchData = myTree.find(searchKey);
+    if (searchData != "")
+        std::cout << "Data found for key " << searchKey << ": " << searchData << std::endl;
+    else
+        std::cout << "Data not found for key " << searchKey << std::endl;
 
-    
-    std::cout << countNode(node1) << '\n';
+    // Removing a node
+    int removeKey = 7;
+    std::string removedData = myTree.remove(removeKey);
+    if (removedData != "")
+        std::cout << "Removed data for key " << removeKey << ": " << removedData << std::endl;
+    else
+        std::cout << "No data found for key " << removeKey << std::endl;
+
+    std::string removeAnyData = myTree.removeAny();
+
+    // Printing the BST after removal
+    myTree.print();
 
     return 0;
 }
