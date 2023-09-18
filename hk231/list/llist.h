@@ -86,6 +86,23 @@ public:
         assert(curr->next != nullptr);
         return curr->next->data;
     }
+
+    void reverse() {
+        Link<T>* cur = head;
+        Link<T>* tmp;
+        Link<T>* newHead = new Link<T>();
+
+        tail = cur->next;
+
+        while (cur != nullptr) {
+            tmp = cur;
+            cur = cur->next;
+            tmp->next = newHead->next;
+            newHead->next = tmp;
+        }
+
+        head = newHead;
+    }
 };
 
 #endif // LLIST_H

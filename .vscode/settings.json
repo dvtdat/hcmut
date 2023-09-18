@@ -69,5 +69,6 @@
         "stdexcept": "cpp",
         "thread": "cpp",
         "stack": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "enabled"
 }
