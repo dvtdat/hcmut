@@ -2,10 +2,7 @@
 #define ALIST_H
 
 #include <assert.h>
-
 #include "list.h"
-
-const int defaultSize = 10;
 
 template <typename T>
 class AList : public List<T> {
@@ -28,7 +25,7 @@ public:
         listSize = curr = 0;
         listArray = new T[maxSize];
     }
-    void insert(const T& item) {
+    void insert(const T& item) {                    // O(n)
         assert(listSize < maxSize);
         for (int i = listSize; i > curr; --i) {
             listArray[i] = listArray[i - 1];
@@ -36,11 +33,11 @@ public:
         listArray[curr] = item;
         listSize++;
     }
-    void append(const T& item) {
+    void append(const T& item) {                    // O(1)
         assert(listSize < maxSize);
         listArray[listSize++] = item;
     }
-    T remove() {
+    T remove() {                                    // O(n)
         assert(curr >= 0 && curr < listSize);
         T item = listArray[curr];
         for (int i = curr; i < listSize - 1; ++i) {
@@ -50,20 +47,20 @@ public:
         return item;
     }
 
-    void moveToStart() { curr = 0; }
-    void moveToEnd() { curr = listSize; }
-    void moveToPos(int pos) {
+    void moveToStart() { curr = 0; }                // O(1)
+    void moveToEnd() { curr = listSize; }           // O(1)
+    void moveToPos(int pos) {                       // O(1)
         assert((pos >= 0) && (pos <= listSize));
         curr = pos;
     }
 
-    void prev() { if (curr) curr--; }
-    void next() { if (listSize - curr) curr++; }
+    void prev() { if (curr) curr--; }               // O(1)
+    void next() { if (listSize - curr) curr++; }    // O(1)
 
     int length() const { return listSize; }
     int currentPos() const { return curr; }
 
-    const T& getValue() const {
+    const T& getValue() const {                     // O(1)
         assert((curr >= 0 && curr < listSize));
         return listArray[curr];
     }

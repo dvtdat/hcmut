@@ -1,6 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
 
+const int defaultSize = 10;
+
 template <typename T>
 class List {
 private:
