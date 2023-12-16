@@ -1,125 +1,219 @@
 #include "main.h"
-#include <assert.h>
 
-const int MAXSZ = 10;
 const int inf = (int)1e9;
 
+typedef Restaurant::customer Node;
+
 class LList {
-protected:
-	Restaurant::customer* head;
-	Restaurant::customer* tail;
-	Restaurant::customer* curr;
+public:
+	Node* head;
+	Node* tail;
+	Node* curr;
 	int cnt, size;
 
 	void init() {
-		curr = head = new Restaurant::customer("", 0, nullptr, nullptr);
-		tail = new Restaurant::customer("", 0, nullptr, nullptr);
+		curr = head = new Node("", 0, nullptr, nullptr);
+		tail = new Node("", 0, nullptr, nullptr);
 		head->next = tail;
 		tail->prev = head;
 		cnt = 0;
 	}
-
 	void removeAll() {
-		Restaurant::customer* tmp = head->next;
-        while (tmp != tail && tmp != nullptr) {
-            Restaurant::customer* nxt = tmp->next;
-            delete tmp;
-            tmp = nxt;
-        }
-        delete head;
-        delete tail;
-	}
-public:
-	LList(int size = MAXSZ): size(size) { init(); }
-	~LList() { removeAll(); }
+		if (head == nullptr) return;
 
-	void clear() { removeAll(); init(); }
+		Node* tmp = head;
+		while (tmp->next != head && tmp->next != nullptr) {
+			Node* nxt = tmp->next;
 
-	void append(const string& name, const int& energy) {
-		Restaurant::customer* tmp = new Restaurant::customer(name, energy, tail->prev, tail);
-		tail->prev->next = tmp;
-		tail->prev = tmp;
-		cnt++;
-	}
-
-	Restaurant::customer* remove(const int& indicies, bool print) {
-		if (cnt == 0) return nullptr;
-		Restaurant::customer* tmp = head->next;
-		Restaurant::customer* ptr = nullptr;
-		while (tmp != tail && tmp != head) {
-			if ((tmp->energy < 0 && indicies < 0) || (tmp->energy > 0 && indicies >= 0)) {
-				tmp = tmp->next;
-				continue;
+			if (tmp) {
+				tmp->next = nullptr;
+				tmp->prev = nullptr;
+				delete tmp;
 			}
 
-			Restaurant::customer* del = tmp;
-			tmp->prev->next = del->next;
-			tmp->next->prev = del->prev;
-			cnt--;
-			if (curr == del) curr = tmp->prev;
-			if (print) del->print();
-			// delete del;
-
-			ptr = tmp;
-			tmp = tmp->next;
+			tmp = nxt;
 		}
+		
+		if (tmp) {
+			tmp->next = nullptr;
+			tmp->prev = nullptr;
+			delete tmp;
+		}
+		
+		head = tail = curr = nullptr;
+	}
+public:
+	LList(): size(0) {};
+	LList(int size): size(size) { init(); }
+	~LList() { removeAll(); }
 
-		return ptr;
+	void append(const string& name, const int& energy) {
+		cnt++;
+		Node* tmp = new Node(name, energy, tail->prev, tail);
+		tail->prev->next = tmp;
+		tail->prev = tmp;
+	}
+
+	void remove(const int& indicies, LList* Order) {
+		if (cnt == 0) return;
+		Node* ptr = Order->head->next;
+		do {
+			Node* pp = ptr->next;
+			if (find(ptr->name)) {
+				if ((ptr->energy < 0 && indicies < 0) || (ptr->energy > 0 && indicies >= 0)) {
+					ptr = pp;
+					continue;
+				}
+				Node* tmp = head->next;
+				for (; tmp->name != ptr->name; tmp = tmp->next);
+				Node* del = tmp;
+				tmp->prev->next = del->next;
+				tmp->next->prev = del->prev;
+				cnt--;
+
+				if (del->energy < 0) curr = tmp->prev;
+				else curr = tmp->next;
+
+				if (head->next == del) head->next = tmp->prev;
+
+				del->next = nullptr;
+				del->prev = nullptr;
+				delete del;
+			}
+			ptr = pp;
+		} while (ptr != Order->tail && cnt > 0 && Order->cnt > 0);
+	}
+
+	void removeByOrder(const int& indicies) {
+		if (cnt == 0) return;
+		Node* ptr = tail->prev;
+
+		do {
+			Node* pp = ptr->prev;
+			if ((ptr->energy < 0 && indicies >= 0) || (ptr->energy > 0 && indicies < 0)) {
+				Node* del = ptr;
+				ptr->prev->next = del->next;
+				ptr->next->prev = del->prev;
+				cnt--;
+
+				if (del->energy < 0) curr = ptr->prev;
+				else curr = ptr->next;
+
+				if (head->next == del) head->next = ptr->prev;
+
+				del->print();
+				del->next = nullptr;
+				del->prev = nullptr;
+				delete del;
+			}
+			ptr = pp;
+		} while (ptr != head && cnt > 0);
 	}
 
 	void pop() {
 		if (cnt == 0) return;
-		Restaurant::customer* tmp = head->next;
+		Node* tmp = head->next;
 		head->next = tmp->next;
 		tmp->next->prev = head;
 		curr = head;
 		cnt--;
-		// delete tmp;
+
+		tmp->next = nullptr;
+		tmp->prev = nullptr;
+		delete tmp;
 	}
 
-	int insertionSort(Restaurant::customer* tmp, int n, int gap) {
-		Restaurant::customer* x = tmp;
-		int inc, moves = 0;
+	bool compare(Node* a, Node* b, LList* order) {
+		if (abs(a->energy) > abs(b->energy)) return true;
+		if (abs(a->energy) < abs(b->energy)) return false;
+
+		int pos1 = 0, pos2 = 0, idx = 0;
+		Node* tmp = order->head;
+		while (tmp != nullptr) {
+			if (pos1 && pos2) break;
+			if (tmp->name == a->name) pos1 = idx;
+			if (tmp->name == b->name) pos2 = idx;
+			idx++;
+			tmp = tmp->next;
+		}
+
+		if (pos1 < pos2) return true;
+		return false;
+	}
+
+	void swapNodes(Node* a, Node* b, bool isCircular) {
+		if (a == b || (a->next == b && b->next == a)) return;
+		if (a->next == b) {
+			a->prev->next = b;
+			b->next->prev = a;
+			a->next = b->next;
+			b->prev = a->prev;
+			a->prev = b;
+			b->next = a;
+		} else if (b->next == a) {
+			b->prev->next = a;
+			a->next->prev = b;
+			b->next = a->next;
+			a->prev = b->prev;
+			b->prev = a;
+			a->next = b;
+		} else {
+			a->prev->next = b;
+			a->next->prev = b;
+			b->prev->next = a;
+			b->next->prev = a;
+			swap(a->next, b->next);
+			swap(a->prev, b->prev);
+		}
+
+		if (isCircular) {
+			if (head == a) head = b;
+			else if (head == b) head = a;
+			if (curr == a) curr = b;
+			else if (curr == b) curr = a;
+			return;
+		}	
+	}
+
+	int insertionSort(int n, int begin, int gap, LList* order) {
+		int moves = 0;
+
 		for (int i = gap; i < n; i += gap) {
-			for (inc = 0; inc < gap; ++inc) x = x->next;
-			Restaurant::customer* y = x;
-			int j = i;
-			while (j >= gap) {
-				Restaurant::customer* z = y;
-				// cout << z->next->name << ' ' << y->next->name << '\n';
-				for (inc = 0; inc < gap; ++inc) z = z->prev;
-				if (abs(z->next->energy) >= abs(y->next->energy)) {
-					swap(y->next->energy, z->next->energy);
-					swap(y->next->name, z->next->name);
-					moves += 3;
+			for (int j = i; j >= gap; j -= gap) {
+				Node* x = head->next;
+				Node* y = head->next;
+				for (int c = 0; c < j + begin; ++c) x = x->next;
+				for (int c = 0; c < j + begin - gap; ++c) y = y->next;
+
+				if (compare(x, y, order)) {
+					swapNodes(x, y, false);
+					moves++;
 				}
-				j -= gap;
-				for (inc = 0; inc < gap; ++inc) y = y->prev;
 			}
 		}
 
 		return moves;
 	}
 
-	int shellSort(int n) {
-		int moves = 0;	
-		Restaurant::customer* tmp = head;
+	int shellSort(int n, LList* order) {
+		int moves = 0;
+		Node* tmp = head;
 		for (int i = n / 2; i > 2; i /= 2) {
 			for (int j = 0; j < i; ++j) {
-				moves += insertionSort(tmp, n - j, i);
-				tmp = tmp->next;
+				moves += insertionSort(n - j, j, i, order);
 			}
 		}
-		moves += insertionSort(head, n, 1);
+		moves += insertionSort(n, 0, 1, order);
 		return moves;
 	}
 	
-	int getTotal() const {
+	int getTotal(bool onlyPositive) const {
 		if (cnt == 0) return 0;
 		int total = 0;
-		Restaurant::customer* tmp = head;
+		Node* tmp = head;
 		do {
 			total += tmp->energy;
+			if (onlyPositive && tmp->energy < 0) total -= tmp->energy; 
 			tmp = tmp->next;
 		} while (tmp != head && tmp != tail);
 		return total;
@@ -127,20 +221,20 @@ public:
 
 	void moveToStart() { curr = head; }
 	void moveToEnd() { curr = tail; }
-	void moveToPtr(Restaurant::customer* ptr) { curr = ptr; }
+	void moveToPtr(Node* ptr) { curr = ptr; }
 	void next() { if (curr->next != tail) curr = curr->next; }
 	void prev() { if (curr->prev != head) curr = curr->prev; }
-	int length() const { return cnt; }
-	int limit() const { return size; }
-	bool full() const { return (cnt >= size); }
+	int getLength() const { return cnt; }
+	int getLimit() const { return size; }
+	bool isFull() const { return (cnt >= size); }
 
 	string getName() const { return curr->next->name; }
 	int getEnergy() const {	return curr->next->energy; }
-	Restaurant::customer* getCurrent() const { return curr->next; }
+	Node* getCurrent() const { return curr->next; }
 
 	void moveToPtrByName(string name) {
 		if (cnt == 0) return;
-		Restaurant::customer* tmp = head;
+		Node* tmp = head;
 		while (tmp != tail && tmp != head) {
 			if (tmp->next->name == name) {
 				curr = tmp;
@@ -153,18 +247,18 @@ public:
 
 	bool find(string& name) {
 		if (cnt == 0) return false;
-		Restaurant::customer* tmp = head;
-		while (tmp != tail && tmp != head) {
+		Node* tmp = head;
+		while (tmp != tail) {
 			if (tmp->next->name == name) return true;
 			tmp = tmp->next;
 		}
 		return false;
 	}
 
-	Restaurant::customer* locateMax() const {
+	Node* locateMax() const {
 		if (cnt == 0) return nullptr;
-		Restaurant::customer* ptr = head;
-		Restaurant::customer* tmp = head;
+		Node* ptr = head;
+		Node* tmp = head;
 		
 		int mx = 0;
 		while (tmp->next != tail && tmp->next != head) {
@@ -179,96 +273,109 @@ public:
 	}
 
 	void print() const {
-		if (cnt <= 0) {
-			cout << '\n'; return;
-		}
-		Restaurant::customer* tmp = head;
+		if (cnt <= 0) return;
+		Node* tmp = head;
 		while (tmp->next != tail && tmp->next != head) {
 			tmp->next->print();
 			tmp = tmp->next;
 		}
-		cout << '\n';
+		// cout << '\n';
 	}
 };
 
 class CLList : public LList {
 private:
-	Restaurant::customer* start;
 public:
-	CLList(int size = MAXSZ) {
+	CLList(int size) {
 		curr = head = nullptr;
-		start = new Restaurant::customer();
 		cnt = 0;
 		this->size = size;
 	}
-	~CLList() { removeAll(); }
+	~CLList() { 
+		removeAll();
+	}
 
 	void insert(const string& name, const int& energy) {
+		Node* newNode = new Node(name, energy, nullptr, nullptr);
+
 		if (cnt == 0) {
-			Restaurant::customer* tmp = new Restaurant::customer(name, energy, nullptr, nullptr);
-			start->next = tmp; 
-			tmp->prev = tmp; tmp->next = tmp;
-			head = tmp; curr = start;
-			cnt++;
-			return;
+			curr = head = newNode;
+			newNode->next = newNode;
+			newNode->prev = newNode;
+		} else {
+			newNode->prev = curr;
+			newNode->next = curr->next;
+			curr->next->prev = newNode;
+			curr->next = newNode;
 		}
-		Restaurant::customer* tmp = new Restaurant::customer(name, energy, curr, curr->next);
-		curr->next->prev = tmp; curr->next = tmp;
+
 		cnt++;
 	}
 
-	void remove(const int& indicies, bool print) {
+	void remove(const int& indicies, LList* Order) {
 		if (cnt == 0) return;
-		Restaurant::customer* tmp = start->next;
+		Node* ptr = Order->head->next;
 		do {
-			if ((tmp->energy < 0 && indicies < 0) || (tmp->energy > 0 && indicies >= 0)) {
-				tmp = tmp->next;
-				continue;
-			}
-			Restaurant::customer* del = tmp;
-			tmp->prev->next = del->next;
-			tmp->next->prev = del->prev;
-			cnt--;
-
-			if (curr == del) curr = tmp->prev;
-			if (head == del) {
-				head = tmp->prev;
-				start->next = tmp->prev;
-			}
-			// delete del;
-			tmp = tmp->next;
-		} while (tmp != start->next);
-
-		if ((start->next->energy < 0 && indicies < 0) || (start->next->energy > 0 && indicies >= 0)) return;
-
-		Restaurant::customer* del = tmp;
-		tmp->prev->next = del->next;
-		tmp->next->prev = del->prev;
-		cnt--;
-
-		if (curr == del) curr = tmp->prev;
-		head = del->prev;
-		start->next = del->prev;
-		// delete del;
-		return;
-	}
-
-	void removeByName(const string& name) {
-		if (cnt == 0) return;
-		Restaurant::customer* tmp = head;
-		do {
-			if (tmp->name == name) {
-				Restaurant::customer* del = tmp;
+			Node* pp = ptr->next;
+			if (find(ptr->name)) {
+				if ((ptr->energy < 0 && indicies < 0) || (ptr->energy > 0 && indicies >= 0)) {
+					ptr = pp;
+					continue;
+				}
+				Node* tmp = head;
+				for (; tmp->name != ptr->name; tmp = tmp->next);
+				Node* del = tmp;
 				tmp->prev->next = del->next;
 				tmp->next->prev = del->prev;
 				cnt--;
-				if (curr == del) curr = tmp->prev;
+
+				if (del->energy < 0) curr = tmp->prev;
+				else curr = tmp->next;
+				
 				if (head == del) head = tmp->prev;
-				// delete del;
-				return;
+
+				del->next = nullptr;
+				del->prev = nullptr;
+				delete del;
 			}
-			tmp = tmp->next;
-		} while (tmp != head);
+			ptr = pp;
+		} while (ptr != Order->tail && cnt > 0 && Order->cnt > 0);
+	}
+
+
+	void removeByName(int n, LList* Order) {
+		if (cnt == 0) return;
+		Node* ptr = Order->head->next;
+		do {
+			Node* pp = ptr->next;
+			if (find(ptr->name)) {
+				Node* tmp = head;
+				for (; tmp->name != ptr->name; tmp = tmp->next);
+				n--;
+				Node* del = tmp;
+				tmp->prev->next = del->next;
+				tmp->next->prev = del->prev;
+				cnt--;
+
+				if (del->energy < 0) curr = tmp->prev;
+				else curr = tmp->next;
+				if (head == del) head = tmp->prev;
+
+				del->next = nullptr;
+				del->prev = nullptr;
+				delete del;
+
+				del = ptr;
+				ptr->prev->next = del->next;
+				ptr->next->prev = del->prev;
+				
+				del->next = nullptr;
+				del->prev = nullptr;
+				delete del;
+				Order->cnt--;
+			}
+			ptr = pp;
+		} while (ptr != Order->tail && n > 0 && cnt > 0 && Order->cnt > 0);
 	}
 
 	void next() { curr = curr->next; }
@@ -277,10 +384,10 @@ public:
 	string getName() const { return (curr ? curr->name : ""); }
 	int getEnergy() const {	return (curr ? curr->energy : -inf); }
 	
-	Restaurant::customer* locateMaxDiff(int& energy) const {
+	Node* locateMaxDiff(int& energy) const {
 		if (cnt == 0) return nullptr;
-		Restaurant::customer* ptr = curr;
-		Restaurant::customer* tmp = curr;
+		Node* ptr = curr;
+		Node* tmp = curr;
 		int mx = 0;
 		do {
 			if (abs(tmp->energy - energy) > mx) {
@@ -290,64 +397,189 @@ public:
 			tmp = tmp->next;
 		} while (tmp != curr);
 		return ptr;
-		cout << '\n';
+	}
+
+	bool find(string& name) {
+		if (cnt == 0) return false;
+		Node* tmp = head->next;
+		do {
+			if (tmp->name == name) return true;
+			tmp = tmp->next;
+		} while (tmp != head->next);
+		return false;
+	}
+
+	void reversal() {
+		if (cnt <= 1) return;
+		Node* tmp = curr;
+		Node* a = curr->next;
+		Node* b = curr;
+		int i = 0;
+		int j = cnt - 1;
+
+		while (j > i) {
+			while (a->energy > 0 && a != b) a = a->next, i++;
+			while (b->energy > 0 && a != b) b = b->prev, j--;
+			Node* aa = a->next;
+			Node* bb = b->prev;
+			if (a->energy < 0 && b->energy < 0) swapNodes(a, b, true);
+
+			if (j <= i) break;
+			a = aa; i++;
+			b = bb; j--;
+		}
+
+		i = 0;
+		j = cnt - 1;
+		a = curr->next;
+		b = curr;
+		while (j > i) {
+			while (a->energy < 0 && a != b) a = a->next, i++;
+			while (b->energy < 0 && a != b) b = b->prev, j--;
+			Node* aa = a->next;
+			Node* bb = b->prev;
+			if (a->energy > 0 && b->energy > 0) swapNodes(a, b, true);
+
+			if (j <= i) break;
+			a = aa; i++;
+			b = bb; j--;
+		}
+		
+		curr = tmp;
+	}
+
+	void findSubarrary() {
+		if (cnt < 4) return;
+
+		Node* tmp = curr;
+		Node* minStart = nullptr;
+		Node* minEnd = nullptr;
+		int sum = 0;
+		int minSum = inf;
+		int minLength = 0;
+
+		do {
+			for (int length = 4; length <= cnt; ++length) {
+				Node* x = tmp;
+				sum = 0;
+				int i = 1;
+				while (i <= length) {
+					sum += x->energy;
+					i++;
+					x = x->next;
+				}
+				// cout << length << ' ' << sum << ' ' << tmp->name << ' ' << x->prev->name << '\n';
+				if ((sum < minSum) || (sum == minSum && length >= minLength)) {
+					minSum = sum;
+					minLength = length;
+					minStart = tmp;
+					minEnd = x;
+				}
+			}
+			
+			tmp = tmp->next;
+		} while (tmp != curr);
+
+		tmp = minStart;
+		int minVal = inf;
+		Node* minNode = nullptr;
+		do {
+			if (tmp->energy < minVal) {
+				minVal = tmp->energy;
+				minNode = tmp;
+			}
+			tmp = tmp->next;
+		} while (tmp != minEnd);
+
+
+		tmp = minNode;
+		do {
+			tmp->print();
+			tmp = tmp->next;
+		} while (tmp != minEnd);
+
+		if (minNode == minStart) {
+			// cout << '\n';
+			return;
+		}
+		
+		tmp = minStart;
+		do {
+			tmp->print();
+			tmp = tmp->next;
+		} while (tmp != minNode);
+		// cout << '\n';
 	}
 
 	void printCWise() const {
-		if (cnt == 0) {
-			cout << '\n'; return;
-		}
-		Restaurant::customer* tmp = curr;
+		if (cnt == 0) return;
+		Node* tmp = curr;
 		do {
 			tmp->print();
 			tmp = tmp->next;
 		} while (tmp != curr);
-		cout << '\n';
+		// cout << '\n';
 	}
 
 	void printCounterCWise() const {
-		if (cnt == 0) {
-			cout << '\n'; return;
-		}
-		Restaurant::customer* tmp = curr;
+		if (cnt == 0) return;
+		Node* tmp = curr;
 		do {
 			tmp->print();
 			tmp = tmp->prev;
 		} while (tmp != curr);
-		cout << '\n';
+		// cout << '\n';
 	}
 };
 
 class imp_res : public Restaurant {
 private:
-	LList* Queue = new LList(100);
-	CLList* Table = new CLList(10);
-	LList* Order = new LList(100);
+	CLList* Table = nullptr;
+	LList* Queue = nullptr;
+	LList* Order = nullptr;
+	bool isQueue = false;
 public:	
 	imp_res() {};
+	~imp_res() {
+		Table->removeAll();
+		Queue->removeAll();
+		Order->removeAll();
+	}
+
 	void RED(string name, int energy) {
+		if (!Table || !Queue || !Order) {
+			Table = new CLList(MAXSIZE);
+			Queue = new LList(MAXSIZE);
+			Order = new LList(200000);
+		}
+
 		if (energy == 0) return;
 
-		if (Table->length() == 0 && !Table->full()) {
+		if (Table->getLength() == 0 && !Table->isFull()) {
 			Table->insert(name, energy);
-			Order->append(name, energy);
+			if (!isQueue) Order->append(name, energy);
+			isQueue = false;
 			Table->next();
 			return;
 		}
 
 		if (Table->find(name) || Queue->find(name)) return;
 
-		if (Table->full()) {
-			if (!Queue->full()) Queue->append(name, energy);
+		if (Table->isFull() && Queue->isFull()) return;
+
+		if (!isQueue) Order->append(name, energy);
+		isQueue = false;
+
+		if (Table->isFull()) {
+			if (!Queue->isFull()) Queue->append(name, energy);
 			return;
 		}
 
-		if (Table->length() >= Table->limit() / 2) {
-			Restaurant::customer* pos = Table->locateMaxDiff(energy);
+		if (Table->getLength() >= Table->getLimit() / 2) {
+			Node* pos = Table->locateMaxDiff(energy);
 			Table->moveToPtr(pos);
 			if (energy - Table->getEnergy() < 0) Table->prev();
 			Table->insert(name, energy);
-			Order->append(name, energy);
 			Table->next();
 			return;
 		}
@@ -356,69 +588,83 @@ public:
 
 		if (energy < Table->getEnergy()) Table->prev();
 		Table->insert(name, energy);
-		Order->append(name, energy);
 		Table->next();
 	}
 
 	void BLUE(int num) {
-		while (num--) {
-			Order->moveToStart();
-			Table->removeByName(Order->getName());
-			Order->pop();
-		}
+		if (num <= 0) return;
+		if (!Table || Table->getLength() <= 0) return;
+		Table->removeByName(num, Order);
+		
+		if (Queue->getLength() <= 0) return;
 
-		while (Queue->length() && !Table->full()) {
+		Queue->moveToStart();
+		while (Queue->getLength() && !Table->isFull()) {
 			string name = Queue->getName();
 			int energy = Queue->getEnergy(); 
 			Queue->pop();
+			isQueue = true;
 			RED(name, energy);
 		}
 	}
 
 	void PURPLE() {
-		Restaurant::customer* tmp = Queue->locateMax();
+		if (!Table || !Queue || Queue->getLength() <= 0) return;
+		Node* tmp = Queue->locateMax();
 		Queue->moveToStart();
-		int cnt = 0;
+		int cnt = 1;
 		while (Queue->getName() != tmp->name) {
 			cnt++; Queue->next();
 		}
-		int moves = Queue->shellSort(cnt);
-		BLUE(moves % MAXSZ);
+		int moves = Queue->shellSort(cnt, Order);
+		
+		// cout << "PURPLE MOVES: " << moves << "\n\n";
+		BLUE(moves % MAXSIZE);
 	}
 
 	void REVERSAL()	{
-		cout << "reversal" << endl;
+		if (!Table || Table->getLength() <= 0) return;
+		Table->reversal();
 	}
 
 	void UNLIMITED_VOID() {
-
+		if (!Table || Table->getLength() < 4) return;
+		Table->findSubarrary();
 	}
 
 	void DOMAIN_EXPANSION()	{
-		int total = Table->getTotal() + Queue->getTotal();
-		Restaurant::customer* a;
-		a = Order->remove(total, true);
-		Table->moveToPtrByName(a->name);
-		Table->remove(total, false);
-		Queue->remove(total, true);
+		if (!Table || Table->getLength() <= 0) return;
+		
+		// int total1 = abs(Table->getTotal(true)) + abs(Queue->getTotal(true));
+		// int total2 = abs(Table->getTotal(false) + Queue->getTotal(false));
+		// int total = total1 - total2;
+
+		int total = Table->getTotal(false) + Queue->getTotal(false);
+
+		Table->remove(total, Order);
+		Queue->remove(total, Order);
+		Order->removeByOrder(total);
+
+		if (Queue->getLength() <= 0) return;
+		
+		Queue->moveToStart();
+		while (Queue->getLength() && !Table->isFull()) {
+			string name = Queue->getName();
+			int energy = Queue->getEnergy(); 
+			Queue->pop();
+			isQueue = true;
+			RED(name, energy);
+		}
 	}
 
 	void LIGHT(int num)	{
+		if (!Table || Table->getLength() <= 0) return;
 		if (num > 0) Table->printCWise();
 		if (num < 0) Table->printCounterCWise();
 		if (num == 0) Queue->print();
 	}
 
-	void PRINT() {
-		cout << '\n';
-		cout << "Table:\n";
-		Table->printCWise();
-
-		cout << "Queue:\n";
-		Queue->print();
-
-		// cout << "Order:\n";
-		// Order->print();
-		cout << "--------------\n";
+	void ORDER() {
+		Order->print();
 	}
 };

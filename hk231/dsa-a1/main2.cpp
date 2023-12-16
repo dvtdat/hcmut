@@ -1,11 +1,11 @@
 #include "main.h"
-#include "Restaurant.cpp"
+#include "Restaurant2.cpp"
 #include <fstream>
 
 void simulate(string filename, imp_res* r)
 {
 	ifstream ss(filename);
-	freopen("OUTPUT.out", "w", stdout); // look here
+	freopen("OUTPUT.txt", "w", stdout); // look here
 	string str, maxsize, name, energy, num;
 	while (ss >> str)
 	{

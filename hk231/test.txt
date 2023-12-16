@@ -1,0 +1,728 @@
+// STUDENT ANSWER BEGIN
+// You can define other functions here to help you.
+
+void BFS()
+{
+    queue<Node*> q;
+    q.push(root);
+    
+    while (q.size()) {
+        Node* node = q.front(); q.pop();
+        cout << node->value << ' ';
+        
+        if (node->pLeft) q.push(node->pLeft);
+        if (node->pRight) q.push(node->pRight);
+    }
+}
+// STUDENT ANSWER END
+
+
+-----------------------
+typedef pair<int, int> ii;
+
+ii find(BTNode* root) {
+    if (!root) return ii(0, 0);
+    if (!root->left && !root->right) return ii(1, root->val);
+    
+    ii a = find(root->left);
+    ii b = find(root->right);
+    
+    if (a.first > b.first) return ii(a.first + 1, root->val + a.second);
+    if (a.first < b.first) return ii(b.first + 1, root->val + b.second);
+    
+    return ii(a.first + 1, root->val + max(a.second, b.second));
+}
+
+int longestPathSum(BTNode* root) {
+    return find(root).second;
+}
+
+
+---------------------
+bool find(BTNode* root, int x) {
+    if (!root) return false;
+    if (root->val == x) return true;
+    return (find(root->right, x) || find(root->left, x));
+}
+
+int lowestAncestor(BTNode* root, int a, int b) {
+    if (find(root->left, a) && find(root->right, b)) return root->val;
+    if (find(root->left, b) && find(root->right, a)) return root->val;
+    if (find(root->left, a) && find(root->left, b)) return lowestAncestor(root->left, a, b);
+    if (find(root->right, a) && find(root->right, b)) return lowestAncestor(root->right, a, b);
+    
+    return root->val;
+}
+
+---------------------
+int sum = 0;
+const int MOD = 27022001;
+
+void get(BTNode* root, int val) {
+    if (!root) return;
+    
+    if (!root->left && !root->right) {
+        (sum += val * 10 + root->val) %= MOD;
+    } else {
+        get(root->left, (val * 10 + root->val) % MOD);
+        get(root->right, (val * 10 + root->val) % MOD);
+    }
+    
+    return;
+}
+
+int sumDigitPath(BTNode* root) {
+    sum = 0;
+    get(root, 0);
+    return sum;
+}
+
+
+--------------------
+int countTwoChildrenNode(Node* root) {
+    if (!root) return 0;
+    return (root->pLeft && root->pRight ? 1 : 0) + countTwoChildrenNode(root->pLeft) + countTwoChildrenNode(root->pRight);
+}
+
+int countTwoChildrenNode() {
+    return countTwoChildrenNode(root);
+}
+// STUDENT ANSWER END
+
+
+--------------------
+int getHeight(Node* root) {
+    if (!root) return 0;
+    return 1 + max(getHeight(root->pLeft), getHeight(root->pRight));
+}
+
+int getHeight() {
+    return getHeight(root);
+}
+
+stringstream ss;
+
+void preOrder(Node* root) {
+    if (!root) return;
+    ss << root->value << ' ';
+    preOrder(root->pLeft);
+    preOrder(root->pRight);
+}
+
+void inOrder(Node* root) {
+    if (!root) return;
+    inOrder(root->pLeft);
+    ss << root->value << ' ';
+    inOrder(root->pRight);
+}
+
+void postOrder(Node* root) {
+    if (!root) return;
+    postOrder(root->pLeft);
+    postOrder(root->pRight);
+    ss << root->value << ' ';
+}
+
+string preOrder() {
+    ss.str("");
+    preOrder(root);
+    return ss.str();
+}
+
+string inOrder() {
+    ss.str("");
+    inOrder(root);
+    return ss.str();
+}
+
+string postOrder() {
+    ss.str("");
+    postOrder(root);
+    return ss.str();
+}
+
+// STUDENT ANSWER END
+
+
+
+-----------------------
+int sumOfLeafs(Node* root) {
+    if (!root) return 0;
+    return (!root->pLeft && !root->pRight ? 1 : 0) * root->value + sumOfLeafs(root->pLeft) + sumOfLeafs(root->pRight);
+}
+
+int sumOfLeafs(){
+    return sumOfLeafs(root);
+}
+
+
+
+
+
+-----------------------
+//Helping functions
+
+void add(Node** root, T value) {
+    if (*root == nullptr) {
+        *root = new Node(value);
+        return;
+    }
+    
+    if ((*root)->value > value) add(&(*root)->pLeft, value);
+    else add(&(*root)->pRight, value);
+}
+
+void add(T value){
+    add(&root, value);
+}
+
+Node* deleteMin(Node** root) {
+    if (*root == nullptr) return nullptr;
+    if ((*root)->pLeft == nullptr) {
+        Node* rightNode = (*root)->pRight;
+        delete *root;
+        return rightNode;
+    }
+    
+    (*root)->pLeft = deleteMin(&(*root)->pLeft);
+    return *root;
+}
+
+Node* getMin(Node* root) {
+    if (root->pLeft == nullptr) return root;
+    return getMin(root->pLeft);
+}
+
+void deleteNode(Node** root, T value) {
+    if (*root == nullptr) return;
+    
+    if ((*root)->value > value) deleteNode(&(*root)->pLeft, value);
+    else if ((*root)->value < value) deleteNode(&(*root)->pRight, value);
+    else {
+        Node* tmp = *root;
+        if ((*root)->pLeft == nullptr) {
+            *root = (*root)->pRight;
+            delete tmp;
+        } else if ((*root)->pRight == nullptr) {
+            *root = (*root)->pLeft;
+            delete tmp;
+        } else {
+            Node* mn = getMin((*root)->pRight);
+            (*root)->value = mn->value;
+            (*root)->pRight = deleteMin(&(*root)->pRight);
+        }
+    }
+}
+
+void deleteNode(T value){
+    deleteNode(&root, value);
+}
+
+
+
+------------------
+vector<int> bfs(BSTNode* root) {
+    int toggle = 1;
+    vector<int> d;
+    stack<BSTNode*> q, tmp;
+    q.push(root);
+    
+    while (q.size() || tmp.size()) {
+        if (q.empty() && tmp.size()) {
+            q = tmp;
+            toggle = !toggle;
+            tmp = stack<BSTNode*>();
+        }
+        
+        BSTNode* u = q.top(); q.pop();
+        d.push_back(u->val);
+        
+        if (toggle) {
+            if (u->left) tmp.push(u->left);
+            if (u->right) tmp.push(u->right);
+        } else {
+            if (u->right) tmp.push(u->right);
+            if (u->left) tmp.push(u->left);
+        }
+    }
+    
+    return d;
+}
+
+vector<int> levelAlterTraverse(BSTNode* root) {
+    if (!root) return vector<int>();
+    return bfs(root);
+}
+
+
+
+------------------------
+int getSize(BSTNode* root) {
+    if (!root) return 0;
+    return 1 + getSize(root->left) + getSize(root->right);
+}
+
+int kthSmallest(BSTNode* root, int k) {
+    if (!root) return 0;
+    
+    int left = getSize(root->left);
+    int right = getSize(root->right);
+    
+    if (left + right == 0) return root->val;
+    
+    if (left + 1 == k) return root->val;
+    if (left + 1 < k) return kthSmallest(root->right, k - left - 1);
+    if (left + 1 > k) return kthSmallest(root->left, k);
+    
+    return 0;
+}
+
+
+
+-----------------------
+int getSize(BTNode* root) {
+    if (!root) return 0;
+    return 1 + getSize(root->left) + getSize(root->right);
+}
+
+int getMax(BTNode* root) {
+    if (!root) return -(int)1e9;
+    return max(max(getMax(root->left), getMax(root->right)), root->val);
+}
+
+int getMin(BTNode* root) {
+    if (!root) return (int)1e9;
+    return min(min(getMin(root->left), getMin(root->right)), root->val);
+}
+
+int rangeCount(BTNode* root, int lo, int hi) {
+    int mn = getMin(root);
+    int mx = getMax(root);
+    
+    if (hi < mn || mx < lo) return 0;
+    if (lo <= mn && mx <= hi) return getSize(root);
+    
+    if (root->val < lo) return rangeCount(root->right, lo, hi);
+    if (root->val > hi) return rangeCount(root->left, lo, hi);
+    
+    return 1 + rangeCount(root->left, lo, hi) + rangeCount(root->right, lo, hi);
+}
+
+
+
+-----------------------
+int singleChild(BSTNode* root) {
+    if (!root) return 0;
+    bool a = root->left;
+    bool b = root->right;
+    
+    return (a ^ b) + singleChild(root->left) + singleChild(root->right);
+}
+
+
+
+------------------------
+int getMin(BSTNode* root) {
+    if (!root) return (int)1e9;
+    return min(min(getMin(root->left), getMin(root->right)), root->val);
+}
+
+int getMax(BSTNode* root) {
+    if (!root) return -1;
+    return max(max(getMax(root->left), getMax(root->right)), root->val);
+}
+
+BSTNode* subtreeWithRange(BSTNode* root, int lo, int hi) {
+    int mn = getMin(root);
+    int mx = getMax(root);
+    
+    if (mx < lo || hi < mn) {
+        return nullptr;
+    }
+    
+    if (lo <= mn && mx <= hi) {
+        return root;
+    }
+    
+    if (root->val < lo) {
+        root->left = nullptr;
+        return subtreeWithRange(root->right, lo, hi);
+    }
+    
+    if (root->val > hi) {
+        root->right = nullptr;
+        return subtreeWithRange(root->left, lo, hi);
+    }
+    
+    root->left = subtreeWithRange(root->left, lo, hi);
+    root->right = subtreeWithRange(root->right, lo, hi);
+    return root;
+}
+
+
+
+
+----------------------
+bool find(Node* root, T i) {
+    if (!root) return false;
+    return (root->value == i) || find(root->pLeft, i) || find(root->pRight, i);
+}
+
+int getTotal(Node* root) {
+    if (!root) return 0;
+    return root->value + getTotal(root->pLeft) + getTotal(root->pRight);
+}
+
+int getMin(Node* root) {
+    if (!root) return (int)1e9;
+    return min(min(getMin(root->pLeft), getMin(root->pRight)), root->value);
+}
+
+int getMax(Node* root) {
+    if (!root) return -1;
+    return max(max(getMax(root->pLeft), getMax(root->pRight)), root->value);
+}
+
+bool find(T i) {
+    return find(root, i);
+}
+
+T sum(Node* root, T l, T r) {
+    int mn = getMin(root);
+    int mx = getMax(root);
+    
+    if (mx < l || r < mn) return 0;
+    if (l <= mn && mx <= r) return getTotal(root);
+    
+    if (root->value < l) {
+        return sum(root->pRight, l, r);
+    }
+    
+    if (root->value > r) {
+        return sum(root->pLeft, l, r);
+    }
+    
+    return root->value + sum(root->pRight, l, r) + sum(root->pLeft, l, r);
+}
+
+T sum(T l, T r) {
+    return sum(root, l, r);
+}
+
+
+-------------------------
+// STUDENT ANSWER BEGIN
+// You can define other functions here to help you.
+
+int getMin(Node* root) {
+    if (!root) return (int)1e9;
+    return min(min(getMin(root->pLeft), getMin(root->pRight)), root->value);
+}
+
+int getMax(Node* root) {
+    if (!root) return -1;
+    return max(max(getMax(root->pLeft), getMax(root->pRight)), root->value);
+}
+
+T getMin() {
+    return getMin(root);
+}
+
+T getMax() {
+    return getMax(root);
+}
+
+// STUDENT ANSWER END
+
+
+
+------------------------
+static T* Partition(T* start, T* end) {
+    T pivot = *start;
+    T* i = start;
+    T* j = end;
+    
+    do {
+        do i++; while (*i < pivot);
+        do j--; while (*j > pivot);
+        swap(*i, *j);
+    } while (i < j);
+    
+    swap(*i, *j);
+    swap(*j, *start);
+    
+    return j;
+}
+
+static void QuickSort(T* start, T* end) {
+    if (start >= end) return;
+    
+    T* index = Partition(start, end);
+    cout << index - start << ' ';
+    
+    QuickSort(start, index);
+    QuickSort(index + 1, end);
+}
+
+-----------------
+static void merge(T* left, T* middle, T* right){
+    int n1 = middle - left + 1;
+    int n2 = right - middle;
+    
+    int a[n1], b[n2];
+    
+    for (int i = 0; i < n1; ++i) a[i] = left[i];
+    for (int j = 0; j < n2; ++j) b[j] = middle[j + 1];
+    
+    int i = 0, j = 0, k = 0;
+    while (i < n1 && j < n2) {
+        if (b[j] >= a[i]) left[k++] = a[i++];
+        else left[k++] = b[j++];
+    }
+    
+    while (i < n1) left[k++] = a[i++];
+    while (j < n2) left[k++] = b[j++];
+    
+    Sorting::printArray(left, right);
+}
+
+static void mergeSort(T* start, T* end){
+    if (end <= start) return;
+    
+    T* middle = start + (end - start) / 2;
+    
+    mergeSort(start, middle);
+    mergeSort(middle + 1, end);
+    
+    merge(start, middle, end);
+}
+
+
+
+-------------------------
+// You must use the nodes in the original list and must not modify ListNode's val attribute. 
+// Hint: You should complete the function mergeLists first and validate it using our first testcase example
+
+// Merge two sorted lists
+ListNode* mergeLists(ListNode* a, ListNode* b) {
+    if (a == nullptr && b == nullptr) return nullptr;
+    
+    ListNode* head = nullptr;
+    ListNode* tail = nullptr;
+    
+    while (a != nullptr && b != nullptr) {
+        if (a->val < b->val) {
+            if (!head) head = tail = a;
+            else {
+                tail->next = a;
+                tail = tail->next;
+            }
+            a = a->next;
+            tail->next = nullptr;
+        } else {
+            if (!head) head = tail = b;
+            else {
+                tail->next = b;
+                tail = tail->next;
+            }
+            b = b->next;
+            tail->next = nullptr;
+        }
+    }
+    if (!head) return (a != nullptr ? a : b);
+    tail->next = (a != nullptr ? a : b);
+    return head;
+}
+
+// Sort and unsorted list given its head pointer
+ListNode* mergeSortList(ListNode* head) {
+    if (head == nullptr || head->next == nullptr) return head;
+    
+    ListNode* ptr1 = head;
+    ListNode* ptr2 = head->next;
+    
+    while (ptr2 != nullptr && ptr2->next != nullptr) {
+        ptr2 = ptr2->next->next;
+        ptr1 = ptr1->next;
+    }
+    
+    ListNode* back = ptr1->next;
+    ptr1->next = nullptr;
+    
+    ListNode* frontHalf = mergeSortList(head);
+    ListNode* backHalf = mergeSortList(back);
+    
+    return mergeLists(frontHalf, backHalf);
+}
+
+
+
+------------------------
+static void merge(T* start, T* middle, T* end) {
+    int n1 = middle - start + 1;
+    int n2 = end - middle;
+
+    int* a = new int[n1];
+    int* b = new int[n2];
+
+    for (int i = 0; i < n1; ++i) a[i] = start[i];
+    for (int i = 0; i < n2; ++i) b[i] = middle[i + 1];
+
+    int i = 0, j = 0, k = 0;
+    while (i < n1 && j < n2) {
+        if (a[i] <= b[j]) start[k++] = a[i++];
+        else start[k++] = b[j++];
+    }
+
+    while (i < n1) start[k++] = a[i++];
+    while (j < n2) start[k++] = b[j++];
+}
+
+static void InsertionSort(T* start, T* end) {
+    int n = end - start;
+    for (int i = 1; i < n; ++i) {
+        for (int j = i; j > 0 && start[j] < start[j - 1]; --j) {
+            swap(start[j], start[j - 1]);
+        }
+    }
+}
+
+static void TimSort(T* start, T* end, int min_size) {
+    int n = end - start;
+    
+    int i = 0;
+    T* cur = start;
+    
+    for (; i < n; i += min_size, cur += min_size) {
+        if (i + min_size <= n) InsertionSort(cur, cur + min_size);
+        else InsertionSort(cur, end);
+    }
+    
+    cout << "Insertion Sort: ";
+    printArray(start, end);
+    
+    int cnt = 0;
+    T* tmp = end;
+    
+    for (int gap = min_size; gap < n; gap *= 2) {
+        cur = start;
+        for (int i = 0; i < n; i += gap * 2) {
+            T* middle = cur + gap - 1;
+            if (i + gap - 1 >= n) middle = end - 1;
+            
+            if (i + gap * 2 - 1 < n) tmp = cur + gap * 2 - 1;
+            else tmp = end - 1;
+            
+            merge(cur, middle, tmp);
+            cout << "Merge " << ++cnt << ": ";
+            printArray(start, end);
+            
+            cur += gap * 2;
+        }
+    }
+}
+
+
+
+---------------------
+int maxNumberOfPeople(vector<int>& rooms, vector<int>& people, int k) {
+    sort(people.begin(), people.end());
+    sort(rooms.begin(), rooms.end());
+    int cnt = 0, i = 0, j = 0;
+    
+    while (i < people.size() && j < rooms.size()) {
+        if (abs(rooms[j] - people[i]) <= k) {
+            cnt++;
+            i++;
+            j++;
+        }
+        else if (rooms[j] > people[i]) {
+            i++;
+        }
+        else {
+            j++;
+        }
+    }
+    return cnt;
+}
+
+
+
+
+---------------------------
+string minDiffPairs(int* arr, int n){
+    string res = "";
+    sort(arr, arr + n);
+    
+    int mn = arr[1] - arr[0];
+    for (int i = 1; i < n; ++i) {
+        mn = min(mn, arr[i] - arr[i - 1]);
+    }
+    
+    bool flag = false;
+    for (int i = 1; i < n; ++i) {
+        if (arr[i] - arr[i - 1] == mn) {
+            if (flag) res += ", ";
+            res += "(" + to_string(arr[i-1]) + ", " + to_string(arr[i]) + ")";
+            flag = true;
+        }
+    }
+    
+    return res;
+}
+
+
+
+--------------------------
+typedef pair<int, int> ii;
+typedef pair<ii, int> iii;
+
+#include <map>
+
+void sortByFrequency(int a[], int n){
+    map<int, ii> mp;
+    
+    for (int i = n - 1; i >= 0; --i) {
+        mp[a[i]].first++;
+        mp[a[i]].second = i;
+    }
+    
+    vector<iii> v;
+    for (map<int, ii>::iterator it = mp.begin(); it != mp.end(); ++it) {
+        v.push_back(iii(ii(-it->second.first, it->second.second), it->first));
+    }
+    
+    sort(v.begin(), v.end());
+    
+    int k = 0;
+    for (iii i : v) {
+        for (int j = 0; j < -i.first.first; ++j) a[k++] = i.second;
+    }
+}
+
+
+
+----------------------------
+double dis(Point a, Point b) {
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
+void closestKPoints(Point points[], int n, Point &des_point, int k) {
+    vector<Point> v;
+    v.push_back(points[0]);
+    
+    for (int i = 1; i < n; ++i) {
+        v.push_back(points[i]);
+        for (int j = i; j > 0; --j) {
+            if (dis(des_point, v[j]) < dis(des_point, v[j - 1])) {
+                swap(v[j], v[j - 1]);
+            }
+        }
+    }
+    
+    if (k > n) k = n;
+    for (int i = 0; i < k; ++i) {
+        v[i].display();
+        cout << '\n';
+    }
+}

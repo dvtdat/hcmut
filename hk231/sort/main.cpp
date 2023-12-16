@@ -19,8 +19,6 @@ void print() {
     moves = 0, comps = 0;
 }
 
-// comps = inversion
-// moves = comps + (n - 1) * 2
 void insertionSort(int* arr, const int &n) {
     int tmp, j;
     for (int i = 1; i < n; ++i) {
@@ -32,7 +30,6 @@ void insertionSort(int* arr, const int &n) {
             } else break;
         }
         arr[j + 1] = tmp; moves++;
-        printArray(arr, n);
     }
 }
 
@@ -52,13 +49,10 @@ void selectionSort(int* arr, const int &n) {
 
 // comps = n * (n - 1) / 2
 void bubbleSort(int* arr, const int &n) {
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n - i - 1; ++j) {
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = n - 1; j > i; --j) {
             comps++;
-            if (arr[j] > arr[j + 1]) {
-                swap(arr[j], arr[j + 1]);
-                moves += 3;
-            }
+            if (arr[j] < arr[j - 1]) swap(arr[j], arr[j - 1]), moves++;
         }
     }
 }
@@ -92,12 +86,13 @@ void mergesort(int* arr,int left, int right) {
 }
 
 int main() {
-    int n = 7;
-    int* arr = new int[7] {5, 16, 20, 12, 1, 40, 22};
+    int n = 4;
+    int* arr = new int[10] {5, 3, 20, 12};
     printArray(arr, n);
-    mergesort(arr, 0, n - 1);
+    insertionSort(arr, n);
     printArray(arr, n);
-
+    print();
+    
     delete arr;
     return 0;
 }

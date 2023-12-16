@@ -20,6 +20,7 @@ public:
     {
         this->title = new char[strlen(title) + 1];
         strcpy(this->title, title);
+
         this->authors = new char[strlen(authors) + 1];
         strcpy(this->authors, authors);
 
@@ -30,6 +31,7 @@ public:
     {
         this->title = new char[strlen(book.getTitle()) + 1];
         strcpy(this->title, book.getTitle());
+        
         this->authors = new char[strlen(book.getAuthors()) + 1];
         strcpy(this->authors, book.getAuthors());
 

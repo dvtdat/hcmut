@@ -1,5 +1,8 @@
 {
-    "files.associations": {
-        "iosfwd": "cpp"
-    }
+  "files.associations": {
+    "iosfwd": "cpp",
+    "typeindex": "cpp",
+    "typeinfo": "cpp",
+    "vector": "cpp"
+  }
 }

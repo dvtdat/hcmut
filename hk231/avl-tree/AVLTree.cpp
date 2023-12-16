@@ -124,13 +124,13 @@ Node<Key, Type>* AVLTree<Key, Type>::insert(Node<Key, Type>* root, const Key& k,
         return leftRotate(root);
     }
 
-    // The extra node is in the left child of the right child of root
+    // The extra node is in the right child of the left child of root
     if (BF > 1 && k > root->left->key) {
         root->left = leftRotate(root->left);
         return rightRotate(root);
     }
 
-    // The extra node is in the right child of the left child of root
+    // The extra node is in the left child of the right child of root
     if (BF < -1 && k < root->right->key) {
         root->right = rightRotate(root->right);
         return leftRotate(root);
