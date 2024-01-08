@@ -1,0 +1,30 @@
+L42: s = CCCDEFGHI
+L169: newRoot->key = .
+L170: newRoot->frequency = 2
+2(D, E)
+L169: newRoot->key = .
+L170: newRoot->frequency = 2
+2(F, G)
+L169: newRoot->key = .
+L170: newRoot->frequency = 2
+2(H, I)
+L169: newRoot->key = .
+L170: newRoot->frequency = 4
+4(2(D, E), 2(F, G))
+L169: newRoot->key = .
+L170: newRoot->frequency = 5
+5(2(H, I), C)
+L169: newRoot->key = .
+L170: newRoot->frequency = 9
+9(4(2(D, E), 2(F, G)), 5(2(H, I), C))
+L308: huffmanCode[i] = 11
+L308: huffmanCode[i] = 11
+L308: huffmanCode[i] = 11
+L308: huffmanCode[i] = 000
+L308: huffmanCode[i] = 001
+L308: huffmanCode[i] = 010
+L308: huffmanCode[i] = 011
+L308: huffmanCode[i] = 100
+L308: huffmanCode[i] = 101
+L787: customer.getResult() = 668
+L788: customer.getID() = 9

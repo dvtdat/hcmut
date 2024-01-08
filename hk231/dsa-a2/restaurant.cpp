@@ -2,9 +2,9 @@
 
 using ii = pair<int, int>;
 template<typename T> using sptr = shared_ptr<T>;
-#define debug(X) { auto _X = (X); std::cerr << "L" << __LINE__ << ": " << #X << " = " << (_X) << std::endl; }
 
 const int INF = 1e9 + 7;
+#define debug(X) { auto _X = (X); std::cout << "L" << __LINE__ << ": " << #X << " = " << (_X) << std::endl; }
 
 int MAXSIZE;
 
@@ -39,6 +39,8 @@ public:
         for (auto &x : s) {
             x = encode(x, cnt);
         }
+        debug(s);
+
         compress.clear();
         compress.assign(s.begin(), s.end());
 
@@ -122,24 +124,24 @@ private:
     sptr<HuffTreeNode> root;
     unordered_map<char, string> huffmanCode;
 
-    void rightRotation(sptr<HuffTreeNode> &A) {
+    sptr<HuffTreeNode> rightRotation(sptr<HuffTreeNode> &A) {
         sptr<HuffTreeNode> B = A->left;
         A->left = B->right;
         B->right = A;
 
-        A->height = 1 + max(getDepth(A->left), getDepth(A->right));
-        B->height = 1 + max(getDepth(B->left), getDepth(B->right));
-        A = B;
+        A->height = 1 + max(getHeight(A->left), getHeight(A->right));
+        B->height = 1 + max(getHeight(B->left), getHeight(B->right));
+        return B;
     }
 
-    void leftRotation(sptr<HuffTreeNode> &A) {
+    sptr<HuffTreeNode> leftRotation(sptr<HuffTreeNode> &A) {
         sptr<HuffTreeNode> B = A->right;
         A->right = B->left;
         B->left = A;
 
-        A->height = 1 + max(getDepth(A->left), getDepth(A->right));
-        B->height = 1 + max(getDepth(B->left), getDepth(B->right));
-        A = B;
+        A->height = 1 + max(getHeight(A->left), getHeight(A->right));
+        B->height = 1 + max(getHeight(B->left), getHeight(B->right));
+        return B;
     }
 
 public:
@@ -161,12 +163,21 @@ public:
             sptr<HuffTreeNode> right = pq.top(); pq.pop();
 
             int sum = left->frequency + right->frequency;
-            counter++;
+            int hi = 1 + max(getHeight(left), getHeight(right));
+            sptr<HuffTreeNode> newRoot(new HuffTreeNode('.', sum, ++counter, hi, left, right));
 
-            int hi = 1 + max(getDepth(left), getDepth(right));
-            sptr<HuffTreeNode> newRoot(new HuffTreeNode('.', sum, counter, hi, left, right));
+			debug(newRoot->key);
+            debug(newRoot->frequency);
+            printTree(newRoot); cout << '\n';
 
-            balance(newRoot);
+            int attempt = 2;
+            while (attempt >= 0) {
+                int tmp = attempt;
+                newRoot = balanceHelper(newRoot, attempt);
+                newRoot->firstAppear = counter;
+                if (tmp == attempt) attempt--;
+            }
+            
             pq.push(newRoot);
         }
 
@@ -176,42 +187,66 @@ public:
         encode(root, "", huffmanCode);
     }
 
-    void balance(sptr<HuffTreeNode> &root) {
-        for (int attempt = 0; attempt < 3; ++attempt) {
-            bool isRoot = false;
-            auto tmp = findFistUnbalancedNode(root);
-            bool flag = false;
+    sptr<HuffTreeNode> balanceHelper(sptr<HuffTreeNode> root, int &attempt) {
+		if (!root->left && !root->right) return root;
 
-            isRoot = (tmp == root);
-            if (!tmp) break;
+		pair<int, sptr<HuffTreeNode>> tmp = balance(root, attempt);
+		attempt -= tmp.first;
+		root = tmp.second;
 
-            int balanceFactor = getBalanceFactor(tmp);
-            if (balanceFactor > 1) {
-                flag = true;
-                if (getBalanceFactor(tmp->left) >= 0) {
-                    rightRotation(tmp);
-                    if (isRoot) root = tmp;
-                } else {
-                    auto nextTmp = tmp->left->right;
-                    leftRotation(tmp->left);
-                    if (++attempt == 3) break;
-                    rightRotation(tmp);
-                    if (isRoot) root = nextTmp;
-                }
-            } else if (balanceFactor < -1) {
-                flag = true;
-                if (getBalanceFactor(tmp->right) <= 0) {
-                    leftRotation(tmp);
-                    if (isRoot) root = tmp;
-                } else {
-                    auto nextTmp = tmp->right->left;
-                    rightRotation(tmp->right);
-                    if (++attempt == 3) break;
-                    leftRotation(tmp);
-                    if (isRoot) root = nextTmp;
-                }
-            }
-        }
+		if (tmp.first)	return root;
+
+		if (root->left) {
+			root->left = balanceHelper(root->left, attempt);
+			pair<int, sptr<HuffTreeNode>> left = balance(root, attempt);
+			attempt -= left.first;
+			root = left.second;
+			if (left.first) return root;
+		}
+
+		if (root->right) {
+			root->right = balanceHelper(root->right, attempt);
+			pair<int, sptr<HuffTreeNode>> right = balance(root, attempt);
+			attempt -= right.first;
+			root = right.second;
+			if (right.first) return root;
+		}
+
+		return root;
+	}
+
+    pair<int, sptr<HuffTreeNode>> balance(sptr<HuffTreeNode> &root, int cnt) {
+        int BF = getBalanceFactor(root);
+        int BFL = getBalanceFactor(root->left);
+        int BFR = getBalanceFactor(root->right);
+
+        if (BF > 1) {
+			if (BFL >= 0) {
+				root = rightRotation(root);	
+                return {1, root};
+			}
+			else {
+				sptr<HuffTreeNode> tmp = root->left;
+				root->left = leftRotation(tmp);
+                if (cnt == 1) return {1, root};
+				root = rightRotation(root);
+				return {2, root};
+			}
+		}
+		else if (BF < -1) {
+			if (BFR <= 0) {
+				root = leftRotation(root);
+                return {1, root};
+			}
+			else {
+				sptr<HuffTreeNode> tmp = root->right;
+				root->right = rightRotation(tmp);
+                if (cnt == 1) return {1, root};
+				root = leftRotation(root);
+                return {2, root};
+			}
+		}
+        return {0, root};
     }
 
     void printTree() {
@@ -223,36 +258,26 @@ public:
         return 1 + getSize(root->left) + getSize(root->right);
     }
 
-    int getDepth(sptr<HuffTreeNode> root) {
+    int getHeight(sptr<HuffTreeNode> root) {
         if (!root) return 0;
         return root->height;
     }
 
     int getBalanceFactor(sptr<HuffTreeNode> root) {
         if (!root) return 0;
-        return getDepth(root->left) - getDepth(root->right);
+        return getHeight(root->left) - getHeight(root->right);
     }
-
-    sptr<HuffTreeNode> findFistUnbalancedNode(sptr<HuffTreeNode> root) {
-        if (!root) return nullptr;
-
-        int balanceFactor = getBalanceFactor(root);
-        if (balanceFactor < -1 || balanceFactor > 1) return root;
-        sptr<HuffTreeNode> leftNode = findFistUnbalancedNode(root->left);
-        sptr<HuffTreeNode> rightNode = findFistUnbalancedNode(root->right);
-        
-        if (leftNode && (getBalanceFactor(leftNode) < -1 || getBalanceFactor(rightNode) > 1))	return leftNode;
-        if (rightNode && (getBalanceFactor(rightNode) < -1 || getBalanceFactor(rightNode) > 1))	return rightNode;
-        return nullptr;
-    }
-
+    
     void printTree(sptr<HuffTreeNode> root) {
         if (!root) return;
         if (!root->left && !root->right) {
             cout << root->key;
             return;
         }
-        cout << root->key << "(";
+        
+        if (root->key == '.') cout << root->frequency << "(";
+        else cout << root->key << "("; 
+
         printTree(root->left);
         cout << ", ";
         printTree(root->right);
@@ -278,7 +303,10 @@ public:
         vector<int> list(name.getCompress());
 
         string result = "";
-        for (auto i : list) result += huffmanCode[i];
+        for (auto i : list) {
+            result += huffmanCode[i];
+            debug(huffmanCode[i]);
+        }
 
         int endIdx = (int)result.size();
         int startIdx = max(0, endIdx - 10);
@@ -324,6 +352,7 @@ public:
 
     void printTree() {
         huffTree->printTree();
+        cout << '\n';
     }
 
     Name getName() {
@@ -611,7 +640,6 @@ public:
     }
 
     void reheapUp(int position) {
-        // debug(position);
         if (position <= 0 || position >= capacity) return;
         int parent = (position - 1) / 2;
 
@@ -624,9 +652,6 @@ public:
     void reheapDown(int position) {
         if (position < 0 || position > (int)heap.size() / 2) return;
         int smallest = -1;
-        
-        // debug(heap[2 * position + 1]->getSize());
-        // debug(heap[2 * position + 2]->getSize());
 
         if (2 * position + 1 < (int)heap.size()) {
             if (2 * position + 2 < (int)heap.size()) {
@@ -643,7 +668,7 @@ public:
     }
 
     void addCustomer(Customer customer) {
-        if (customer.getID() <= 0 || customer.getID() >= capacity) return;
+        if (customer.getID() <= 0 || customer.getID() > capacity) return;
 
         int index = -1;
         for (int i = 0; i < (int)heap.size(); ++i) {
@@ -675,7 +700,6 @@ public:
 
         for (int j = 0; j < (int)heap.size(); ++j) {
             if (find(idx.begin(), idx.end(), j) != idx.end()) continue;
-
             if (mnSize > heap[j]->getSize()) {
                 mnSize = heap[j]->getSize();
                 mnTurn = heap[j]->getTurn();
@@ -704,10 +728,10 @@ public:
         vector<int> idx;
         vector<sptr<Area>> ptr;
         for (int i = 0; i < num; ++i) {
-            idx.push_back(getMin(idx));
+            idx.push_back(getMin(idx)); 
+            if (idx.back() == -1) break;
             ptr.push_back(heap[idx.back()]);
         }
-        
         for (sptr<Area> area : ptr) {
             int i;
             for (i = 0; i < (int)heap.size(); ++i) {
@@ -728,9 +752,7 @@ public:
     }
 
     void printHeap() {
-        debug(heap.size());
         for (int i = 0; i < (int)heap.size(); ++i) {
-            debug(heap[i]->getLabel());
             // cout << i << ' ' << heap[i]->getLabel() << ' ' << heap[i]->getSize() << ' ' << heap[i]->getTurn() << '\n';
         }
     }
@@ -753,7 +775,7 @@ private:
 public:
     Simulate() {
         latestCustomer = nullptr;
-        for (int i = 0; i < MAXSIZE; ++i) GojoRestaurant.push_back(BSTree());
+        for (int i = 0; i <= MAXSIZE; ++i) GojoRestaurant.push_back(BSTree());
     }
 
     void lapse(string name) {
@@ -764,7 +786,6 @@ public:
 
         debug(customer.getResult());
         debug(customer.getID());
-        customer.printTree();
 
         if (customer.getResult() & 1) {
             GojoRestaurant[customer.getID()].addCustomer(customer);
@@ -774,13 +795,10 @@ public:
     }
 
     void kokusen() {
-        for (BSTree area : GojoRestaurant) {
+        for (BSTree& area : GojoRestaurant) {
             if (area.isEmpty()) continue;
             unsigned long long permutationResult = area.getPermutation();
-            debug(permutationResult);
-            area.printTree();
             area.remove((int)min(permutationResult, (unsigned long long)MAXSIZE));
-            area.printTree();
         }
     }
 
@@ -794,6 +812,7 @@ public:
     }
 
     void limitless(int num) {
+        if (num >= (int)GojoRestaurant.size()) return;
         GojoRestaurant[num].printInOrder();
     }
 
@@ -802,8 +821,7 @@ public:
     }
 
     void test() {
-        // cout << "You're as beautiful as the day I lost you\n";
-        SukanaRestaurant.printHeap();
+       cout << "You're as beautiful as the day I lost you\n";
     }
 };
 
@@ -812,6 +830,8 @@ void simulate(string filename)
 {
     ifstream ss(filename);
     string str;
+
+    freopen("out.txt", "w", stdout);
 
     ss >> str;
     ss >> MAXSIZE;
