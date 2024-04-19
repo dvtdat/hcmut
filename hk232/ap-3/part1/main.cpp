@@ -17,59 +17,60 @@ const int COLLEGE_EXAM = 1;
 const int MAX_SCORE = 10;
 const int MAX_STUDENT = 20;
 
-class Assignment {
-private:
-    int score;
-
-public:
-    Assignment() : score(0) {}
-    Assignment(int score) : score(score) {}
-
-    int getScore() const {
-        return score;
-    }
-
-    void doAssignment() {
-        score = rand() % (MAX_SCORE + 1);
-    }
-};
-
-class Test {
-private:
-    int score;
-    
-public:
-    Test() : score(0) {}
-    Test(int score) : score(score) {}
-
-    int getScore() const {
-        return score;
-    }
-
-    void takeTest() {
-        score = rand() % (MAX_SCORE + 1);
-    }
-};
-
-class Exam {
-private:
-    int score;
-
-public:
-    Exam() : score(0) {}
-    Exam(int score) : score(score) {}
-
-    int getScore() const {
-        return score;
-    }
-
-    void takeExam() {
-        score = rand() % (MAX_SCORE + 1);
-    }
-};
-
 class Course {
 private:
+    
+    class Assignment {
+    private:
+        int score;
+
+    public:
+        Assignment() : score(0) {}
+        Assignment(int score) : score(score) {}
+
+        int getScore() const {
+            return score;
+        }
+
+        void doAssignment() {
+            score = rand() % (MAX_SCORE + 1);
+        }
+    };
+
+    class Test {
+    private:
+        int score;
+        
+    public:
+        Test() : score(0) {}
+        Test(int score) : score(score) {}
+
+        int getScore() const {
+            return score;
+        }
+
+        void takeTest() {
+            score = rand() % (MAX_SCORE + 1);
+        }
+    };
+
+    class Exam {
+    private:
+        int score;
+
+    public:
+        Exam() : score(0) {}
+        Exam(int score) : score(score) {}
+
+        int getScore() const {
+            return score;
+        }
+
+        void takeExam() {
+            score = rand() % (MAX_SCORE + 1);
+        }
+    };
+
     vector<Assignment> assignments;
     vector<Test> tests;
     vector<Exam> exams;
